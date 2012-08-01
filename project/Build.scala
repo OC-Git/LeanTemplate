@@ -18,11 +18,12 @@ object ApplicationBuild extends Build {
         "org.jsoup" % "jsoup" % "1.6.2" % "test", 
         
         // modules
-        "commons" % "commons_2.9.1" % "1.0-SNAPSHOT",
-        "search" % "search_2.9.1" % "1.0-SNAPSHOT",
-        "crud-view" % "crud-view_2.9.1" % "1.0-SNAPSHOT",
-        "abtest" % "abtest_2.9.1" % "1.0-SNAPSHOT",
-        "monitoring" % "monitoring_2.9.1" % "1.0-SNAPSHOT"
+        "leantemplate.commons" % "leantemplate.commons_2.9.1" % "1.0-SNAPSHOT",
+        "leantemplate.search" % "leantemplate.search_2.9.1" % "1.0-SNAPSHOT",
+        "leantemplate.crud" % "leantemplate.crud_2.9.1" % "1.0-SNAPSHOT",
+        "leantemplate.crud-view" % "leantemplate.crud-view_2.9.1" % "1.0-SNAPSHOT",
+        "leantemplate.abtest" % "leantemplate.abtest_2.9.1" % "1.0-SNAPSHOT",
+        "leantemplate.monitoring" % "leantemplate.monitoring_2.9.1" % "1.0-SNAPSHOT"
     )
 
     // Only compile the bootstrap bootstrap.less file and any other *.less file in the stylesheets directory 
@@ -38,6 +39,7 @@ object ApplicationBuild extends Build {
 	val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
 	  // Add your own project settings here
 	    lessEntryPoints <<= baseDirectory(customLessEntryPoints),
+	    resolvers += Resolver.url("Sebastian Baltes Repository", url("http://sebastianbaltesobjectcode.github.com/releases/"))(Resolver.ivyStylePatterns),
 	    resolvers += Resolver.url("Joerg Violas Repository", url("http://www.joergviola.de/releases/"))(Resolver.ivyStylePatterns)
 	)    
 
