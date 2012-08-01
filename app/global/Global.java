@@ -23,7 +23,7 @@ import com.avaje.ebean.Ebean;
 
 public class Global extends GlobalSettings {
 
-    public final static String APP_NAME = "AppTemplate"; 
+    public final static String APP_NAME = "LeanTemplate"; 
 
     //FIXME: add remote IP (from header and response code)
     @SuppressWarnings("rawtypes")

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 SCRIPT=$(dirname $0)
 MODULES="commons search crud crud-view abtest"
