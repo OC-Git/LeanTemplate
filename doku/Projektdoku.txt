@@ -1,6 +1,8 @@
-Heroku URL: http://radiant-dawn-1264.herokuapp.com/
+Doku: https://docs.google.com/folder/d/0B3WF4--dEH4KY1NQVWtaYTU1U0k/edit
 
-Github URL: https://github.com/SebastianBaltesObjectCode/AppTemplatePublic.git
+Heroku URL: http://leantemplate.herokuapp.com
+
+Github URL: https://github.com/OC-Git/LeanTemplate
 
 Module übersetzen
 -----------------
