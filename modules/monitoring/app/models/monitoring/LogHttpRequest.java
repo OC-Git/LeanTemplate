@@ -1,4 +1,4 @@
-package models.logevents;
+package models.monitoring;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

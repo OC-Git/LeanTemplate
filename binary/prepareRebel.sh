@@ -1,4 +1,4 @@
 # you need to "source" this file
 
-export AppTemplateRoot="$HOME/JavaProjects/GameDuellWS/AppTemplatePublic"
+export LeanTemplateRoot="$HOME/JavaProjects/GameDuellWS/AppTemplatePublic"
 

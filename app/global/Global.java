@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import models.User;
-import models.logevents.LogHttpRequest;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import play.Application;
@@ -18,37 +17,23 @@ import play.mvc.Action;
 import play.mvc.Http.Context;
 import play.mvc.Http.Request;
 import play.mvc.Result;
-import authenticate.Authenticated;
 import com.avaje.ebean.Ebean;
+
+import de.objectcode.play2.plugin.monitoring.RequestLogger;
 
 public class Global extends GlobalSettings {
 
     public final static String APP_NAME = "LeanTemplate"; 
 
-    //FIXME: add remote IP (from header and response code)
     @SuppressWarnings("rawtypes")
 	@Override
     public Action onRequest(final Request _request, final Method _actionMethod) {
         return new Action.Simple() {
             public Result call(Context ctx) throws Throwable {
-            	final LogHttpRequest log = new LogHttpRequest();
-            	log.setStartTime(System.currentTimeMillis());
-            	log.setFromIP(null);
-            	log.setHost(_request.host());
-            	log.setMethod(_request.method());
-            	log.setReferer(_request.getHeader("referer"));
-            	log.setUrl(_request.uri());
-            	log.setUserAgent(_request.getHeader("user-agent"));
-            	
-                final Result result = delegate.call(ctx);
-                
-            	log.setUserId(ctx.session().get(Authenticated.SESSION_KEY_UUID));
-            	log.setEndTime(System.currentTimeMillis());
-            	log.save();
-                return result; 
+            	return RequestLogger.log(ctx, _request, delegate);
             }
         };
-    }
+    }    
     
 	@Override
 	public void onStart(final Application app) {

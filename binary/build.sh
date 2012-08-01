@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT=$(dirname $0)
-MODULES="commons search crud crud-view abtest"
+MODULES="monitoring commons search crud crud-view abtest"
 
 
 for module in $MODULES; do
