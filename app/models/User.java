@@ -24,29 +24,29 @@ public class User extends CrudModel<User> {
 
     public static final ModelFinder find = new ModelFinder();
 
-	public long fixRandomNumber = rnd.nextLong();
-	public String email;
-	public String passwordHash;
-	public String role;
-	public String timezone = "Europe/Berlin";
-	public boolean validated;
+    private long fixRandomNumber = rnd.nextLong();
+    private String email;
+    private String passwordHash;
+    private String role;
+    private String timezone = "Europe/Berlin";
+    private boolean validated;
 
 	// optional fields
-	public String firstname;
-	public String surname;
-	public String address;
-	public String country;
-	public String zipCode;
-	public String city;
+    private String firstname;
+    private String surname;
+    private String address;
+    private String country;
+    private String zipCode;
+    private String city;
 
 	@Column(name="random_pwrecover")
-	public String randomPasswordRecoveryString;
+	private String randomPasswordRecoveryString;
 	@Column(name="pwrecover_triggered")
-	public Timestamp randomPasswordRecoveryTriggerDate;
+	private Timestamp randomPasswordRecoveryTriggerDate;
 
 	@PrivateOwned
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
-	public Set<Ding> dings; 
+	private Set<Ding> dings; 
 
 	public String variant(String featureName) {
 		return MvTest.get().variant(getFixRandomNumber(), featureName);
@@ -84,14 +84,6 @@ public class User extends CrudModel<User> {
 		timezone = _timezone;
 	}
 	
-	public Timestamp getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Timestamp lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-
     public void setValidated(boolean validated) {
 		this.validated = validated;
 	}
@@ -181,7 +173,7 @@ public class User extends CrudModel<User> {
 	}
 	
 	@Override
-    public String label() {
+    public String getLabel() {
         return email;
     }
 

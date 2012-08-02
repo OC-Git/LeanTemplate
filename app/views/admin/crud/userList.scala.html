@@ -15,11 +15,11 @@
   } {
       @for(user <- currentPage.getList) {
         <tr>
-	      <td><a href="@clist.crudBaseUrl/@user.id">@user.email</a></td>
-	      <td>@user.role</td>
-	      <td>@user.firstname</td>
-	      <td>@user.surname</td>
-	      <td>@fmt(user.validated)</td>
+	      <td><a href="@clist.getCrudBaseUrl/@user.getId">@user.getEmail</a></td>
+	      <td>@user.getRole</td>
+	      <td>@user.getFirstname</td>
+	      <td>@user.getSurname</td>
+	      <td>@fmt(user.isValidated)</td>
         </tr>
       }
   }

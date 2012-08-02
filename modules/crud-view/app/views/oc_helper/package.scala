@@ -111,7 +111,7 @@ package object oc_helper {
 
   val selectDefaultOptionText = (x: Any) => {
     x match {
-      case c: CrudModel[_] => c.label
+      case c: CrudModel[_] => c.getLabel
       case _ => x.toString
     }
   }

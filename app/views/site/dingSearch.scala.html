@@ -55,13 +55,13 @@
       		</thead>
 	      @for(ding <- results) {
 	        <tr>
-		      <td><a href="#">@ding.name</a></td>
-		      <td>@ding.description</td>
-		      <td>@fmt(ding.special)</td>
-		      <td>@fmt(ding.price)</td> 
-		      <td>@elvis[User](ding.user,_.getEmail())</td>
-		      <td>@fmt(ding.someDate)</td> 
-		      <td>@fmt(ding.someTime)</td> 
+		      <td><a href="#">@ding.getName</a></td>
+		      <td>@ding.getDescription</td>
+		      <td>@fmt(ding.isSpecial)</td>
+		      <td>@fmt(ding.getPrice)</td> 
+		      <td>@elvis[User](ding.getUser,_.getEmail())</td>
+		      <td>@fmt(ding.getSomeDate)</td> 
+		      <td>@fmt(ding.getSomeTime)</td> 
 	        </tr>
 	      }
 	      </table>

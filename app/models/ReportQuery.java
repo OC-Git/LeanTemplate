@@ -30,7 +30,7 @@ public class ReportQuery extends CrudModel<ReportQuery> {
 	private List<ReportQueryParameter> queryParameters;
 
 	@Override
-	public String label() {
+	public String getLabel() {
 		return "name";
 	}
 

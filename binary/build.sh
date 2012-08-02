@@ -1,8 +1,7 @@
 #!/bin/bash
 
 SCRIPT=$(dirname $0)
-MODULES="monitoring commons search crud crud-view abtest"
-
+source $SCRIPT/config.sh
 
 for module in $MODULES; do
 	echo "+++++++++++++++++++++++ BUILDING MODULE $module +++++++++++++++++++++++"

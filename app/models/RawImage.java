@@ -29,18 +29,18 @@ public class RawImage extends Model {
 	private static Finder<Long, RawImage> finder = new Finder<Long, RawImage>(Long.class, RawImage.class);
 	
     @Id
-    public Long id;
+    private Long id;
     @Version
-    public Timestamp lastUpdate;
+    private Timestamp lastUpdate;
 	@Lob
 	@Required
-	public byte[] image;
+	private byte[] image;
 	@Required
-	public int width;
+	private int width;
 	@Required
-	public int height;
+	private int height;
 	@Required
-	public String mimetype;	
+	private String mimetype;	
 	
 	public static RawImage byId(Long id) {
 		return finder.byId(id);

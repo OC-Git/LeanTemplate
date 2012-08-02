@@ -13,21 +13,21 @@ public class MvTestVariant extends CrudModel<MvTestVariant> {
 	public static final ModelFinder find = new ModelFinder();
 
 	@Constraints.Required
-	public int index;
+	private int index;
 
 	@Constraints.Required
 	@NonEmpty
-	public String name;
+	private String name;
 
 	@Constraints.Required
-	public double percent;
+	private double percent;
 
 	@Constraints.Required
 	@ManyToOne
-	public MvTestFeature feature;
+	private MvTestFeature feature;
 
 	@Override
-	public String label() {
+	public String getLabel() {
 		return name;
 	}
 
