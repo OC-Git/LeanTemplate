@@ -14,6 +14,10 @@ GET		/assets/site/bootstrap/js/*file									controllers.Assets.at(path="/public
 GET		/assets/site/bootstrap/less/*file								controllers.Assets.at(path="/public/site/bootstrap/less", file)
 GET		/assets/site/stylesheets/*file									controllers.Assets.at(path="/public/site/stylesheets", file)
 
+# Generic Images
+GET     /image/:id	 													controllers.site.DbImageController.image(id: Long)  
+POST    /image		 													controllers.site.DbImageController.upload()  
+
 GET 	/login															controllers.site.LoginController.index()
 POST 	/login															controllers.site.LoginController.authenticate()
 GET		/signout														controllers.site.LoginController.signOut()

@@ -16,14 +16,14 @@ public class UnterDing extends CrudModel<UnterDing> {
 
     @Constraints.Required
     @NonEmpty
-    public String name;
+    private String name;
 	@ManyToOne(fetch=FetchType.EAGER)
-	public Ding ding;
+	private Ding ding;
 	@OneToOne
-	public DbImage image;
+	private DbImage image;
 	
     @Override
-    public String label() {
+    public String getLabel() {
     	return name;
     }
 

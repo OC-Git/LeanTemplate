@@ -28,18 +28,18 @@ public class MvTestFeature extends CrudModel<MvTestFeature> {
 
 	@Constraints.Required
 	@NonEmpty
-	public String name;
+	private String name;
 
 	@Constraints.Required
-	public Timestamp startTime;
+	private Timestamp startTime;
 
 	@Constraints.Required
-	public Timestamp endTime;
+	private Timestamp endTime;
 
 	@Column(length=1024) 
-	public String description;
+	private String description;
 
-	public long fixRandomMask = rnd.nextLong();	
+	private long fixRandomMask = rnd.nextLong();	
 	
 	@PrivateOwned
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "feature")
@@ -74,7 +74,7 @@ public class MvTestFeature extends CrudModel<MvTestFeature> {
 	}
 
 	@Override
-	public String label() {
+	public String getLabel() {
 		return name;
 	}
 

@@ -39,7 +39,7 @@ public class LogVariantEvent extends CrudModel<LogVariantEvent> {
 	}
 	
 	@Override
-	public String label() {
+	public String getLabel() {
 		return "info";
 	}
 	@Override

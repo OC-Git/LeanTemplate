@@ -36,7 +36,7 @@ object ApplicationBuild extends Build {
 	    (base / "app" / "assets" / "site" / "stylesheets" * "*.less")
 	)
 	
-	val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
+	val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
 	  // Add your own project settings here
 	    lessEntryPoints <<= baseDirectory(customLessEntryPoints),
 	    resolvers += Resolver.url("Sebastian Baltes Repository", url("http://sebastianbaltesobjectcode.github.com/releases/"))(Resolver.ivyStylePatterns),

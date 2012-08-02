@@ -17,11 +17,11 @@ import com.avaje.ebean.Ebean;
 public abstract class CrudModel<T extends CrudModel<T>> extends Model {
 	
     @Id
-    public Long id;
+    private Long id;
     @Version
-    public Timestamp lastUpdate;
+    private Timestamp lastUpdate;
 
-    public abstract String label();
+    public abstract String getLabel();
 
     public abstract CrudFinder<T> getCrudFinder();
     
@@ -60,7 +60,7 @@ public abstract class CrudModel<T extends CrudModel<T>> extends Model {
 
 	@Override
     public String toString() {
-        return this.getClass().getSimpleName()+"[id=" + id + ", label=" + label()+ "]";
+        return this.getClass().getSimpleName()+"[id=" + id + ", label=" + getLabel()+ "]";
     }
 
     @Override

@@ -8,7 +8,6 @@
     @** only the @{id}.id changes the model! **@
     <input id="@id-id" type="hidden" name="@{id}.id" value="@field("id").value.getOrElse(null)"/>
     @** the other hidden fields are only for the validation error case (otherwise no image would be shown) **@
-    <input id="@id-label" type="hidden" name="@{id}.label" value="@field("label").value.getOrElse(null)"/>
     <input id="@id-image-id" type="hidden" name="@{id}.image.id" value="@field("image.id").value.getOrElse(null)"/>
     <input id="@id-image-height" type="hidden" name="@{id}.image.height" value="@field("image.height").value.getOrElse(null)"/>
     <input id="@id-image-width" type="hidden" name="@{id}.image.width" value="@field("image.width").value.getOrElse(null)"/>

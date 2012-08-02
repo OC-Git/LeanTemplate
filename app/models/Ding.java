@@ -26,19 +26,19 @@ public class Ding extends CrudModel<Ding> {
 
     @Constraints.Required
     @NonEmpty
-    public String name;
-    public String description;
-    public boolean special;
+    private String name;
+    private String description;
+    private boolean special;
     @Constraints.Required
     @Column(precision=15, scale=2)    
-    public BigDecimal price;
+    private BigDecimal price;
 	@ManyToOne(fetch=FetchType.EAGER)
-	public User user;
-	public Date someDate;
-	public Timestamp someTime;
-	public DingEnum dingEnum;
+	private User user;
+	private Date someDate;
+	private Timestamp someTime;
+	private DingEnum dingEnum;
 	@ManyToOne(fetch=FetchType.EAGER)
-	public DbImage image;
+	private DbImage image;
 	
 	// Springs formbinding does not permit Set (which would be semantically correct), the collection must be indexed, so using List!
 	@ManyToMany(fetch=FetchType.EAGER)
@@ -57,7 +57,7 @@ public class Ding extends CrudModel<Ding> {
 	// workaround: use a one-to-many entity wich only contains the string 
 	
     @Override
-    public String label() {
+    public String getLabel() {
     	return name;
     }
 
@@ -153,7 +153,7 @@ public class Ding extends CrudModel<Ding> {
 	public CrudFinder<Ding> getCrudFinder() {
 		return find;
 	}
-    
+	
 	public static class ModelFinder extends CrudFinder<Ding> {
 		
 		public ModelFinder() {

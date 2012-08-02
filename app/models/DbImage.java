@@ -16,17 +16,15 @@ public class DbImage extends CrudModel<DbImage> {
 	public static final ModelFinder find = new ModelFinder();
 
 	@Required
-	public String label;
-	@Required
-	public String filename;
+	private String filename;
 	@Required
 	@PrivateOwned
 	@OneToOne(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
-	public RawImage image;
+	private RawImage image;
 	@Required
 	@PrivateOwned
 	@OneToOne(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
-	public RawImage thumbnail;
+	private RawImage thumbnail;
 
 	public String getFilename() {
 		return filename;
@@ -34,14 +32,6 @@ public class DbImage extends CrudModel<DbImage> {
 
 	public void setFilename(String filename) {
 		this.filename = filename;
-	}
-
-	public String getLabel() {
-		return label;
-	}
-
-	public void setLabel(String label) {
-		this.label = label;
 	}
 
 	public RawImage getImage() {
@@ -66,8 +56,8 @@ public class DbImage extends CrudModel<DbImage> {
 	}
 
 	@Override
-	public String label() {
-		return filename;
+	public String getLabel() {
+		return getFilename();
 	}
 
 	public static class ModelFinder extends CrudFinder<DbImage> {

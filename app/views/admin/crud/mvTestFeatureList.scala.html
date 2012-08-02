@@ -14,10 +14,10 @@
   } { 
       @for(feature <- currentPage.getList) {
         <tr>
-	      <td><a href="@clist.crudBaseUrl/@feature.id">@feature.name</a></td>
-	      <td>@feature.description</td>
-	      <td>@fmt(feature.startTime)</td> 
-	      <td>@fmt(feature.endTime)</td> 
+	      <td><a href="@clist.crudBaseUrl/@feature.getId">@feature.getName</a></td>
+	      <td>@feature.getDescription</td>
+	      <td>@fmt(feature.getStartTime)</td> 
+	      <td>@fmt(feature.getEndTime)</td> 
         </tr>
       }
   }
