@@ -15,11 +15,14 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
 import authenticate.site.SiteSecured;
+import de.objectcode.play2.plugin.monitoring.Aggregator;
 import de.objectcode.play2.plugin.monitoring.infoadapter.impl.BoneCPInfoAdapter;
 import de.objectcode.play2.plugin.monitoring.infoadapter.impl.linux.SwapProcFSInfoAdapter;
 
 public class Application extends Controller {
 
+	static int counter;
+	
 	public static Result index() {
 		return ok(views.html.site.index.render());
 	}
@@ -28,7 +31,14 @@ public class Application extends Controller {
 	public static Result dummy() throws Exception {
 //		final BoneCPInfoAdapter s = new BoneCPInfoAdapter();
 //		return ok(""+ s.getCreatedConnectionCount() + "," + s.getFreeConnectionCount() + ", " + s.getLeasedCounnectionCount());
-		return ok("dummy");
+		
+		counter++;
+		if (counter % 3 == 0) {
+			Thread.sleep(1000);
+			throw new RuntimeException("THIS IS A TEST");
+		}
+		
+		return ok("dummy:" + Aggregator.get());
 	}
 
 }

@@ -1,13 +1,12 @@
-package de.objectcode.play2.system.util;
+package de.objectcode.play2.plugin.monitoring.infoadapter.impl;
 
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 
 import play.Logger;
+import de.objectcode.play2.plugin.monitoring.infoadapter.NodeInfoAdapter;
 
 /**
  * 
@@ -20,7 +19,7 @@ import play.Logger;
  * @author <a href="mailto:lochen@objectcode.de">lochen</a>
  * 
  */
-public class DefaultNodeIdentifier implements NodeIdentifier {
+public class DefaultNodeInfoAdapter implements NodeInfoAdapter {
 
 	private static final String DELIMITER = "_";
 
@@ -57,9 +56,4 @@ public class DefaultNodeIdentifier implements NodeIdentifier {
 		}
 		return bf.toString();
 	}
-
-	public static void main(String[] args) {
-		System.out.println(new DefaultNodeIdentifier().getNodeId());
-	}
-
 }

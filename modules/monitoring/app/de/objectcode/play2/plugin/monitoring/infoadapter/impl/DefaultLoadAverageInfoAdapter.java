@@ -7,7 +7,7 @@ import de.objectcode.play2.plugin.monitoring.infoadapter.LoadAverageInfoAdapter;
 
 public class DefaultLoadAverageInfoAdapter implements LoadAverageInfoAdapter {
 	
-	public static final double UNDEFINED = Double.MIN_VALUE; 
+	public static final double UNDEFINED = -1; 
 	
 	@Override
 	public double getAvgOneMinute() {
