@@ -1,24 +1,15 @@
-@(dings : java.util.List[models.Ding])
+@(ding : models.Ding)
 
 @import views.html.oc_helper.bootstrap2._
 @import views.html.oc_helper._ 
 
 @loggedin_main() {
     
-      <div class="span9">
-        <div class="hero-unit">
-          <h1>Dinge!!!</h1>
-          <p>Hier können Sie tolle Dinge bestellen! </p>
-        </div>
-      </div>
-      
-      
         <div class="span9">
             <ul class="thumbnails">
-              @for(ding <- dings) {
               <li class="span3">
               
-                <a class="thumbnail" href="ding/@ding.getId">
+                <a class="thumbnail" href="@ding.getId">
                   <img  
                     @if(ding.getImage!=null && ding.getImage.getThumbnail!=null) {
                       src="image/@ding.getImage.getThumbnail.getId"
@@ -39,7 +30,6 @@
                   
                 </a>
               </li>
-              }
             </ul>
           
         </div>

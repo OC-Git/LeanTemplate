@@ -12,6 +12,7 @@ import authenticate.site.SiteSecured;
 public class Application extends Controller {
 
 	public static Result index() {
+		// FIXME fetch!!
 		List<Ding> dings = Ding.find.all();
 		// Falls der folgende Dummy-Code nicht durchgeführt wird, sind die Relationen in Ding (wie Ding.image) im View nicht geladen - obwohl sie EAGER sind!
 	    String s = "";

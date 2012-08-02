@@ -1,5 +1,8 @@
 @(dings : java.util.List[models.Ding])
 
+@import views.html.oc_helper.bootstrap2._
+@import views.html.oc_helper._ 
+
 @loggedin_main() {
     
       <div class="span9">
@@ -9,28 +12,36 @@
         </div>
       </div>
       
-      <div class="span9">
       
-        @for(ding <- dings) {
-          <ul class="thumbnails">
-            <li class="span3">
-            
-              <a class="thumbnail" href="@ding.getId">
-                <img  
-                  @if(ding.getImage!=null && ding.getImage.getThumbnail!=null) {
-                    src="image/@ding.getImage.getThumbnail.getId"
-                    alt="@ding.getLabel" 
-                    height="@ding.getImage.getThumbnail.getHeight" 
-                    width="@ding.getImage.getThumbnail.getWidth" 
-                  } else {
-                    src="/assets/images/no_photo.jpg"
-                  }
-                />
-              </a>
-            </li>
-          </ul>
-        }
-        
-      </div>
+        <div class="span9">
+            <ul class="thumbnails">
+              @for(ding <- dings) {
+              <li class="span3">
+              
+                <a class="thumbnail" href="ding/@ding.getId">
+                  <img  
+                    @if(ding.getImage!=null && ding.getImage.getThumbnail!=null) {
+                      src="image/@ding.getImage.getThumbnail.getId"
+                      alt="@ding.getLabel" 
+                      height="@ding.getImage.getThumbnail.getHeight" 
+                      width="@ding.getImage.getThumbnail.getWidth" 
+                    } else {
+                      src="/assets/images/no_photo.jpg"
+                    }
+                  />
+                  
+                  <div class="caption">
+                    <h5>@ding.getLabel</h5>
+                    <p>@ding.getDescription</p>
+                    <p>@fmt(ding.getPrice) €</p>
+                    <p>@fmt(ding.getUser)</p>
+                  </div>
+                  
+                </a>
+              </li>
+              }
+            </ul>
+          
+        </div>
     
 }
