@@ -1,8 +1,10 @@
 package de.objectcode.play2.plugin.monitoring;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
+import models.monitoring.MonitorFine;
 import play.Logger;
 import de.objectcode.play2.plugin.monitoring.infoadapter.DbInfoAdapter;
 import de.objectcode.play2.plugin.monitoring.infoadapter.GcInfoAdapter;
@@ -11,7 +13,6 @@ import de.objectcode.play2.plugin.monitoring.infoadapter.LoadAverageInfoAdapter;
 import de.objectcode.play2.plugin.monitoring.infoadapter.NodeInfoAdapter;
 import de.objectcode.play2.plugin.monitoring.infoadapter.SwapInfoAdapter;
 import de.objectcode.play2.plugin.monitoring.infoadapter.ThreadInfoAdapter;
-import models.monitoring.MonitorFine;
 
 public class Aggregator implements Runnable {
 
@@ -32,6 +33,8 @@ public class Aggregator implements Runnable {
 	private long requestCounter; 
 	private long requestDuration;
 	private AtomicInteger exceptionCounter;
+	
+	private ConcurrentHashMap<Class<? extends Throwable>, Integer> exceptionTypeCounterMap;
 
 	protected Aggregator(ThreadInfoAdapter _threadInfoAdapter, SwapInfoAdapter _swapInfoAdapter,
 			NodeInfoAdapter _nodeInfoAdapter, LoadAverageInfoAdapter _loadAverageInfoAdapter,
@@ -47,6 +50,7 @@ public class Aggregator implements Runnable {
 		
 		exceptionCounter = new AtomicInteger();
 		syncSemaphor = new Object();
+		exceptionTypeCounterMap = new ConcurrentHashMap<Class<? extends Throwable>, Integer>();
 	}
 	
 	protected static void set(final Aggregator instance) {
