@@ -16,6 +16,7 @@ import play.data.format.Formatters;
 import play.mvc.Action;
 import play.mvc.Http.Context;
 import play.mvc.Http.Request;
+import play.mvc.Http.RequestHeader;
 import play.mvc.Result;
 import com.avaje.ebean.Ebean;
 
@@ -44,6 +45,12 @@ public class Global extends GlobalSettings {
 		Formatters.register(java.sql.Date.class, new Html5DateFormatter());
 		Formatters.register(BigDecimal.class, new BigDecimalFormatter());
 		MvTest.get().startAutoUpdate();
+	}
+	
+	@Override
+	public Result onError(final RequestHeader request, final Throwable t) {
+		Logger.error("Uncaught Exception=" + t, t);
+		return super.onError(request, t);
 	}
 
 	private void setupLogging(final Application app) {
