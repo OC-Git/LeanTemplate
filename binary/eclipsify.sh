@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT=$(dirname $0)
-MODULES="monitoring commons search crud crud-view abtest"
+source $SCRIPT/config.sh
 
 EclipsifyCurrentProject()
 {
@@ -22,6 +22,7 @@ for module in $MODULES; do
 	popd
 done
 
+echo "+++++++++++++++++++++++ ECLIPSIFY APP +++++++++++++++++++++++"
 EclipsifyCurrentProject
 
 
