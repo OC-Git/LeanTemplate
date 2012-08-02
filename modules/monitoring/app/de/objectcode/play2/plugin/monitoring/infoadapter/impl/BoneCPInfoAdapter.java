@@ -42,17 +42,17 @@ public class BoneCPInfoAdapter implements DbInfoAdapter {
 	}
 
 	@Override
-	public long getCreatedConnectionCount() {
+	public int getCreatedConnectionCount() {
 		return statistics.getTotalCreatedConnections();
 	}
 
 	@Override
-	public long getFreeConnectionCount() {
+	public int getFreeConnectionCount() {
 		return statistics.getTotalFree();
 	}
 
 	@Override
-	public long getLeasedCounnectionCount() {
+	public int getLeasedCounnectionCount() {
 		return statistics.getTotalLeased();
 	}
 

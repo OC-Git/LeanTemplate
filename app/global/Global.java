@@ -14,27 +14,20 @@ import play.Logger;
 import play.Play;
 import play.data.format.Formatters;
 import play.mvc.Action;
-import play.mvc.Http.Context;
 import play.mvc.Http.Request;
-import play.mvc.Http.RequestHeader;
-import play.mvc.Result;
 import com.avaje.ebean.Ebean;
 
-import de.objectcode.play2.plugin.monitoring.RequestLogger;
+import de.objectcode.play2.plugin.monitoring.RequestLoggerAction;
 
 public class Global extends GlobalSettings {
 
     public final static String APP_NAME = "LeanTemplate"; 
-
+	
     @SuppressWarnings("rawtypes")
 	@Override
     public Action onRequest(final Request _request, final Method _actionMethod) {
-        return new Action.Simple() {
-            public Result call(Context ctx) throws Throwable {
-            	return RequestLogger.log(ctx, _request, delegate);
-            }
-        };
-    }    
+    	return new RequestLoggerAction();
+    }
     
 	@Override
 	public void onStart(final Application app) {
@@ -47,12 +40,6 @@ public class Global extends GlobalSettings {
 		MvTest.get().startAutoUpdate();
 	}
 	
-	@Override
-	public Result onError(final RequestHeader request, final Throwable t) {
-		Logger.error("Uncaught Exception=" + t, t);
-		return super.onError(request, t);
-	}
-
 	private void setupLogging(final Application app) {
 		if (Play.isDev() || Play.isTest()) {
 //			Ebean.getServer(null).getAdminLogging().setDebugGeneratedSql(false);
