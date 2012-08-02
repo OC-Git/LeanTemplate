@@ -13,7 +13,7 @@ import models.User;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-//import funcy.FunctionalTest;
+import funcy.FunctionalTest;
 import global.MvTest;
 
 public class MvTestTest extends FunctionalTest {
