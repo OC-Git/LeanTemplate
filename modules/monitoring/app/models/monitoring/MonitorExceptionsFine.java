@@ -21,10 +21,6 @@ public class MonitorExceptionsFine extends Model {
 	public static final Finder<Long, MonitorExceptionsFine> find = new Finder<Long, MonitorExceptionsFine>(Long.class,
 			MonitorExceptionsFine.class);
 
-	public MonitorExceptionsFine() {
-		timestamp = new Timestamp(System.currentTimeMillis());
-	}
-	
 	public Long getId() {
 		return id;
 	}

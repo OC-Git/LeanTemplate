@@ -18,7 +18,7 @@ public class RequestLoggerAction extends Action<Void> {
 			return call;
 		} catch (final Throwable up) {
 			Logger.error("Uncaucht Exception during request=" + up, up);
-			Aggregator.get().incrementExceptionCounter();
+			Aggregator.get().incrementExceptionCounter(up);
 			throw up;
 		} finally {
 			final long t2 = System.currentTimeMillis();

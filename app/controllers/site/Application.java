@@ -15,6 +15,7 @@ import de.objectcode.play2.plugin.monitoring.infoadapter.impl.linux.SwapProcFSIn
 public class Application extends Controller {
 
 	static int counter;
+	static int counter2;
 	
 	public static Result index() {
 		// FIXME fetch!!
@@ -45,8 +46,10 @@ public class Application extends Controller {
 		
 		counter++;
 		if (counter % 3 == 0) {
+			counter2++;
 			Thread.sleep(1000);
-			throw new RuntimeException("THIS IS A TEST");
+			if (counter2 % 2 == 0 ) throw new RuntimeException("THIS IS A TEST");
+			else throw new IllegalArgumentException("THIS IS ANOTHER TEST");
 		}
 		
 		return ok("dummy:" + Aggregator.get());
