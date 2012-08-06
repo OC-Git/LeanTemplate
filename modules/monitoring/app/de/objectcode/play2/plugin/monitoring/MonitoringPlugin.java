@@ -57,7 +57,7 @@ public class MonitoringPlugin extends Plugin {
 		}
 		return instance;
 	}
-	
+
 	@Override
 	public void onStart() {
 
@@ -95,8 +95,10 @@ public class MonitoringPlugin extends Plugin {
 		final DbInfoAdapter dbInfoAdapter = configureInfoAdapter(conf, "class.dbInfoAdapter",
 				DEFAULT_CLASS_DB_INFO_ADAPTER, DbInfoAdapter.class);
 
+		final LoadAverageAggregator loadAverageAggregator = new LoadAverageAggregator(loadAverageInfoAdapter);
+
 		final Aggregator agg = new Aggregator(threadInfoAdapter, swapInfoAdapter, nodeInfoAdapter,
-				loadAverageInfoAdapter, heapMemoryInfoAdapter, gcInfoAdapter, dbInfoAdapter);
+				loadAverageAggregator, heapMemoryInfoAdapter, gcInfoAdapter, dbInfoAdapter);
 
 		Aggregator.set(agg);
 
@@ -104,7 +106,11 @@ public class MonitoringPlugin extends Plugin {
 				.scheduler()
 				.schedule(Duration.create(aggregateJobMillis, TimeUnit.MILLISECONDS),
 						Duration.create(aggregateJobMillis, TimeUnit.MILLISECONDS), Aggregator.get());
-	}
 
+		Akka.system()
+				.scheduler()
+				.schedule(Duration.create(0, TimeUnit.MILLISECONDS), Duration.create(1, TimeUnit.MINUTES),
+						loadAverageAggregator);
+	}
 
 }
