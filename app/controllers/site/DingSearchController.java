@@ -18,6 +18,7 @@ import org.apache.lucene.search.TopDocs;
 
 import authenticate.Authenticated;
 
+import de.objectcode.play2.plugin.monitoring.RequestLoggerAction;
 import de.objectcode.play2.plugin.search.EntityConfig;
 import de.objectcode.play2.plugin.search.SearchPlugin;
 
@@ -33,6 +34,7 @@ public class DingSearchController extends DefaultSearchController {
 	public static final int MAX_RESULTS = 200;
 	
 	public static Result index() {
+		RequestLoggerAction.registerControllerMethod("DingSearchController.index");
 		return ok(views.html.site.dingSearch.render(form, null, null));
 	}
 

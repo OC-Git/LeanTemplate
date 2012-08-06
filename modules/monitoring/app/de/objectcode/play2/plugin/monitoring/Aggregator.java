@@ -10,6 +10,7 @@ import javax.swing.JOptionPane;
 
 import models.monitoring.MonitorExceptionsFine;
 import models.monitoring.MonitorFine;
+import models.monitoring.MonitorResponseTimeFine;
 
 import com.avaje.ebean.Ebean;
 
@@ -43,7 +44,13 @@ public class Aggregator implements Runnable {
 	private int exceptionCounter;
 
 	private Map<Class<? extends Throwable>, Integer> exceptionTypeCounterMap;
-
+	private Map<String, Tupel<Long, Integer>> fineRequestDurationMap;
+	
+	private static class Tupel<V1, V2> {
+		public V1 value1; 
+		public V2 value2; 
+	}
+	
 	protected Aggregator(ThreadInfoAdapter _threadInfoAdapter, SwapInfoAdapter _swapInfoAdapter,
 			NodeInfoAdapter _nodeInfoAdapter, LoadAverageAggregator _loadAverageAggregator,
 			HeapMemoryInfoAdapter _heapMemoryInfoAdapter, GcInfoAdapter _gcInfoAdapter, DbInfoAdapter _dbInfoAdapter) {
@@ -58,7 +65,9 @@ public class Aggregator implements Runnable {
 
 		syncMutexRequestCounter = new Object();
 		syncMutexExceptionFineCounter = new Object();
+		
 		exceptionTypeCounterMap = new HashMap<Class<? extends Throwable>, Integer>(64);
+		fineRequestDurationMap = new HashMap<String, Aggregator.Tupel<Long,Integer>>(64);
 	}
 
 	protected static void set(final Aggregator instance) {
@@ -69,11 +78,28 @@ public class Aggregator implements Runnable {
 		return INSTANCE;
 	}
 
-	public Aggregator incrementRequestCounter(final long duration) {
+	public Aggregator incrementRequestCounter(final long duration, final String controllerMethod) {
 		// FIXME: synchronize sucks !
 		synchronized (syncMutexRequestCounter) {
 			requestCounter++;
 			requestDuration += duration;
+			
+			// fine logging
+			if (controllerMethod != null) {
+				Tupel<Long, Integer> durationAndCountTupel = fineRequestDurationMap.get(controllerMethod);
+				
+				if (durationAndCountTupel == null) {
+					durationAndCountTupel = new Tupel<Long, Integer>();
+					fineRequestDurationMap.put(controllerMethod, durationAndCountTupel);
+					
+					durationAndCountTupel.value1 = duration; 
+					durationAndCountTupel.value2 = 1;
+				}
+				else {
+					durationAndCountTupel.value1 = durationAndCountTupel.value1 + duration;
+					durationAndCountTupel.value2 = durationAndCountTupel.value2 + 1;
+				}
+			}
 		}
 		return this;
 	}
@@ -96,6 +122,7 @@ public class Aggregator implements Runnable {
 	@Override
 	public void run() {
 		final String nodeId = nodeInfoAdapter.getNodeId();
+		final Timestamp now = new Timestamp(System.currentTimeMillis());		
 
 		final MonitorFine mf = new MonitorFine();
 		mf.setNodeId(nodeId);
@@ -118,19 +145,37 @@ public class Aggregator implements Runnable {
 		mf.setSwapUsed(swapInfoAdapter.getUsedSwapBytes());
 		mf.setThreadCount(threadInfoAdapter.getThreadCount());
 
+		final List<MonitorResponseTimeFine> responseFineList = new ArrayList<MonitorResponseTimeFine>(
+				fineRequestDurationMap.size());
+		
 		synchronized (syncMutexRequestCounter) {
 			mf.setRequestCount(requestCounter);
+			
 			if (requestCounter != 0) mf.setResponseTimeAvg((int) (requestDuration / requestCounter));
 			requestCounter = 0;
 			requestDuration = 0;
+			
+			for (final String methodName : fineRequestDurationMap.keySet()) {
+				final Tupel<Long, Integer> tupel = fineRequestDurationMap.get(methodName);
+				if (tupel.value2 == 0) continue;
+				
+				final MonitorResponseTimeFine f = new MonitorResponseTimeFine();
+				f.setTimestamp(now);
+				f.setNodeId(nodeId);
+				f.setRequestMethod(methodName);
+				f.setResponseTime(tupel.value1 / tupel.value2);
+				
+				responseFineList.add(f);
+			}
+			fineRequestDurationMap.clear();
+			
 		}
 
-		// ensure equal timestamp for all MonitorExceptionsFineS
-		final Timestamp now = new Timestamp(System.currentTimeMillis());
 		final List<MonitorExceptionsFine> efList = new ArrayList<MonitorExceptionsFine>(exceptionTypeCounterMap.size());
 
 		synchronized (syncMutexExceptionFineCounter) {
 			mf.setExceptionsSum(exceptionCounter);
+			
 			for (final Class<? extends Throwable> clazz : exceptionTypeCounterMap.keySet()) {
 				final Integer exceptionCount = exceptionTypeCounterMap.get(clazz);
 				final MonitorExceptionsFine ef = new MonitorExceptionsFine();
@@ -146,8 +191,12 @@ public class Aggregator implements Runnable {
 		try {
 			Ebean.beginTransaction();
 			mf.save();
-			for (final MonitorExceptionsFine ef : efList)
+			for (final MonitorExceptionsFine ef : efList) {
 				ef.save();
+			}
+			for (final MonitorResponseTimeFine f : responseFineList) {
+				f.save();
+			}
 			Ebean.commitTransaction();
 		} finally {
 			Ebean.endTransaction();

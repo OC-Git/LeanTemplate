@@ -4,13 +4,14 @@ import java.util.List;
 
 import models.DbImage;
 import models.Ding;
+import play.Logger;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
+import play.mvc.With;
 import authenticate.site.SiteSecured;
 import de.objectcode.play2.plugin.monitoring.Aggregator;
-import de.objectcode.play2.plugin.monitoring.infoadapter.impl.BoneCPInfoAdapter;
-import de.objectcode.play2.plugin.monitoring.infoadapter.impl.linux.SwapProcFSInfoAdapter;
+import de.objectcode.play2.plugin.monitoring.RequestLoggerAction;
 
 public class Application extends Controller {
 
@@ -36,14 +37,12 @@ public class Application extends Controller {
 				// => public Fields sind ein Antipattern in Play!! 
 			}
 		} 
-		return ok(views.html.site.index.render (dings));
+		return ok(views.html.site.index.render(dings));
 	}
 	
 	@Security.Authenticated(SiteSecured.class)
 	public static Result dummy() throws Exception {
-//		final BoneCPInfoAdapter s = new BoneCPInfoAdapter();
-//		return ok(""+ s.getCreatedConnectionCount() + "," + s.getFreeConnectionCount() + ", " + s.getLeasedCounnectionCount());
-		
+		RequestLoggerAction.registerControllerMethod();
 		counter++;
 		if (counter % 3 == 0) {
 			counter2++;

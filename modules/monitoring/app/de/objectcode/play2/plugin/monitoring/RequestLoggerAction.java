@@ -1,5 +1,7 @@
 package de.objectcode.play2.plugin.monitoring;
 
+import javax.swing.JOptionPane;
+
 import models.monitoring.LogHttpRequest;
 import play.Logger;
 import play.mvc.Action;
@@ -9,20 +11,41 @@ import play.mvc.Result;
 
 public class RequestLoggerAction extends Action<Void> {
 
+	private static ThreadLocal<String> commingFromControllerHint = new ThreadLocal<String>();
+	
+	public static void registerControllerMethod(final String name) {
+		commingFromControllerHint.set(name);
+	}
+	
+	public static void registerControllerMethod() {
+		final StackTraceElement[] st = Thread.currentThread().getStackTrace();
+		for (StackTraceElement e : st) {
+			if (e.getClassName().startsWith("controllers.")) {
+				registerControllerMethod(e.getClassName());
+				return;
+			}
+		}
+	}	
+	
 	@Override
 	public Result call(final Context _ctx) throws Throwable {
+		registerControllerMethod(null);
 		final long t1 = System.currentTimeMillis();
 
 		try {
 			final Result call = delegate.call(_ctx);
 			return call;
-		} catch (final Throwable up) {
+		} 
+		catch (final Throwable up) {
 			Logger.error("Uncaucht Exception during request=" + up, up);
 			Aggregator.get().incrementExceptionCounter(up);
 			throw up;
-		} finally {
+		} 
+		finally {
 			final long t2 = System.currentTimeMillis();
-			Aggregator.get().incrementRequestCounter(t2 - t1);
+			final long requestDuration = t2 - t1;
+			
+			Aggregator.get().incrementRequestCounter(requestDuration, commingFromControllerHint.get());
 			logRequest(_ctx, t1, t2);
 		}
 	}
