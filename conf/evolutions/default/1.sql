@@ -88,7 +88,7 @@ create table monitor_response_time_fine (
   timestamp                 timestamp,
   node_id                   varchar(255),
   request_method            varchar(255),
-  response_time             integer,
+  response_time             bigint,
   constraint pk_monitor_response_time_fine primary key (id))
 ;
 

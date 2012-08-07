@@ -16,14 +16,10 @@ public class MonitorResponseTimeFine extends Model {
 	private Timestamp timestamp;
 	private String nodeId;
 	private String requestMethod;
-	private int responseTime;
+	private long responseTime;
 
 	public static final Finder<Long, MonitorResponseTimeFine> find = new Finder<Long, MonitorResponseTimeFine>(
 			Long.class, MonitorResponseTimeFine.class);
-
-	public MonitorResponseTimeFine() {
-		timestamp = new Timestamp(System.currentTimeMillis());
-	}
 
 	public Long getId() {
 		return id;
@@ -57,11 +53,11 @@ public class MonitorResponseTimeFine extends Model {
 		requestMethod = _requestMethod;
 	}
 
-	public int getResponseTime() {
+	public long getResponseTime() {
 		return responseTime;
 	}
 
-	public void setResponseTime(int _responseTime) {
+	public void setResponseTime(long _responseTime) {
 		responseTime = _responseTime;
 	}
 

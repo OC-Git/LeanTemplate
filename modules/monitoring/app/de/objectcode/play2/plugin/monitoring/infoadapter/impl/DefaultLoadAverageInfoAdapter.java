@@ -7,8 +7,6 @@ import de.objectcode.play2.plugin.monitoring.infoadapter.LoadAverageInfoAdapter;
 
 public class DefaultLoadAverageInfoAdapter implements LoadAverageInfoAdapter {
 	
-	public static final double UNDEFINED = -1; 
-	
 	@Override
 	public double getAvgOneMinute() {
 		return ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
@@ -16,12 +14,12 @@ public class DefaultLoadAverageInfoAdapter implements LoadAverageInfoAdapter {
 
 	@Override
 	public double getAvgFiveMinutes() {
-		return UNDEFINED;
+		throw new RuntimeException("getAvgFiveMinutes() is unimplemented");
 	}
 
 	@Override
 	public double getAvgFifteenMinutes() {
-		return UNDEFINED;
+		throw new RuntimeException("getAvgFifteenMinutes() is unimplemented");
 	}
 
 }

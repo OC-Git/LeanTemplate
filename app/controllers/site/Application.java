@@ -18,11 +18,13 @@ import search.DefaultSearchController.SearchForm;
 import search.entities.DingListener;
 import authenticate.site.SiteSecured;
 import de.objectcode.play2.plugin.monitoring.Aggregator;
+import de.objectcode.play2.plugin.monitoring.RequestLoggerAction;
 
 public class Application extends DefaultSearchController {
 
 	public static final int MAX_RESULTS = 200;
 	static int counter;
+	static int counter2;
 	
 	public static Result index() throws IOException, ParseException {
 		final Form<SearchForm> bindForm = form.bindFromRequest();
@@ -65,13 +67,13 @@ public class Application extends DefaultSearchController {
 	
 	@Security.Authenticated(SiteSecured.class)
 	public static Result dummy() throws Exception {
-//		final BoneCPInfoAdapter s = new BoneCPInfoAdapter();
-//		return ok(""+ s.getCreatedConnectionCount() + "," + s.getFreeConnectionCount() + ", " + s.getLeasedCounnectionCount());
-		
+		RequestLoggerAction.registerControllerMethod();
 		counter++;
 		if (counter % 3 == 0) {
+			counter2++;
 			Thread.sleep(1000);
-			throw new RuntimeException("THIS IS A TEST");
+			if (counter2 % 2 == 0 ) throw new RuntimeException("THIS IS A TEST");
+			else throw new IllegalArgumentException("THIS IS ANOTHER TEST");
 		}
 		
 		return ok("dummy:" + Aggregator.get());
