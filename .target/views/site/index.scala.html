@@ -1,27 +1,40 @@
-@(dings : java.util.List[models.Ding])
+@(searchForm : Form[search.DefaultSearchController.SearchForm], results : List[models.Ding], took: Float)
 
+@import views.html.helper._ 
+@import scala.collection.JavaConversions._ 
 @import views.html.oc_helper.bootstrap2._
 @import views.html.oc_helper._ 
 
 @loggedin_main() {
     
       <div class="span9">
-        <div class="hero-unit">
-          <h1>Dinge!!!</h1>
-          <p>Hier können Sie tolle Dinge bestellen! </p>
-        </div>
+        <h1>Dinge!!! <small>Hier können Sie tolle Dinge bestellen! </small></h1>
       </div>
       
+        <div class="span9">
+        
+            @flashmessages()
+            
+            <form class="well form-search" method="post">
+                @inputText(
+                  searchForm("query"), 
+                  'placeholder -> "Suche", 
+                  'class -> "input-large search-query"
+                )
+                <button type="submit" class="btn">Search</button>
+            </form>
+      </div>
+
       
         <div class="span9">
             <ul class="thumbnails">
-              @for(ding <- dings) {
+              @for(ding <- results) {
               <li class="span3">
               
                 <a class="thumbnail" href="ding/@ding.getId">
                   <img  
-                    @if(ding.getImage!=null && ding.getImage.getThumbnail!=null) {
-                      src="image/@ding.getImage.getThumbnail.getId"
+                    @if(ding.getImage!=null) {
+                      src="/image/@ding.getImage.getThumbnail.getId"
                       alt="@ding.getLabel" 
                       height="@ding.getImage.getThumbnail.getHeight" 
                       width="@ding.getImage.getThumbnail.getWidth" 
@@ -34,7 +47,7 @@
                     <h5>@ding.getLabel</h5>
                     <p>@ding.getDescription</p>
                     <p>@fmt(ding.getPrice) €</p>
-                    <p>@fmt(ding.getUser)</p>
+                    <p>@fmt(ding.getUser.getLabel)</p>
                   </div>
                   
                 </a>
@@ -43,5 +56,10 @@
             </ul>
           
         </div>
+    <script>
+    $(document).ready(function() {
+      $("#query").focus();
+    });
+  </script>
     
 }

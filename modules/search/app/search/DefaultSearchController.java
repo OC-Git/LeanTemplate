@@ -66,7 +66,6 @@ public class DefaultSearchController extends Controller {
 	}
 	
 	public static class SearchForm {
-		@Required
 		public String query; 
 		public Integer maxRows;
 	}

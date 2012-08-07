@@ -11,6 +11,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.avaje.ebean.annotation.PrivateOwned;
@@ -47,6 +48,10 @@ public class User extends CrudModel<User> {
 	@PrivateOwned
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
 	private Set<Ding> dings; 
+	
+	@PrivateOwned
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
+	private ShoppingCart shoppingCart;
 
 	public String variant(String featureName) {
 		return MvTest.get().variant(getFixRandomNumber(), featureName);
@@ -172,6 +177,18 @@ public class User extends CrudModel<User> {
 		this.fixRandomNumber = fixRandomNumber;
 	}
 	
+	public ShoppingCart getShoppingCart() {
+		return shoppingCart;
+	}
+
+	public void setShoppingCart(ShoppingCart shoppingCart) {
+		this.shoppingCart = shoppingCart;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
 	@Override
     public String getLabel() {
         return email;
@@ -236,6 +253,16 @@ public class User extends CrudModel<User> {
 			if (other.zipCode != null) return false;
 		} else if (!zipCode.equals(other.zipCode)) return false;
 		return true;
+	}
+
+	public ShoppingCart getOrCreateShoppingCart() {
+		ShoppingCart cart = getShoppingCart();
+		if (cart==null) {
+			cart = new ShoppingCart();
+			cart.setUser(this);
+			this.setShoppingCart(cart);
+		}
+		return cart;
 	}
 	
 	

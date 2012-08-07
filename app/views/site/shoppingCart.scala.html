@@ -1,0 +1,26 @@
+@(user: models.User)
+
+@import views.html.oc_helper.bootstrap2._
+@import views.html.oc_helper._ 
+
+@loggedin_main() {
+    
+        <div class="span9">
+
+            <div class="page-header">
+              <h1>Warenkorb</h1>
+            </div>
+            
+            @_shoppingCart(user)
+  
+            <div class="form-actions">
+              <a href="/shopping/showPayment" class="btn btn-large btn-primary">
+                <i class="icon-shopping-cart icon-white"></i>
+                Zur Kasse
+              </a>
+            </div>
+  
+                   
+        </div>
+    
+}

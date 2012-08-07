@@ -1,0 +1,49 @@
+@(user: models.User)
+
+@import views.html.oc_helper.bootstrap2._
+@import views.html.oc_helper._ 
+
+    <table class="table table-striped table-bordered table-condensed">
+      <thead>
+        <tr>
+          <th>Ding</th>
+          <th>Stückpreis</th>
+          <th>Anzahl</th>
+          <th>Preis</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(entry <- user.getShoppingCart.getEntries) {
+        <tr>
+          <td>@entry.getDing.getName</td>
+          <td>@fmt(entry.getDing.getPrice)</td>
+          <td>@entry.getAmount</td>
+          <td>@fmt(entry.getPrice) €</td>
+        </tr>
+        }
+        <tr>
+          <td></td>
+          <td></td>
+          <td>Summe Netto</td>
+          <td>@fmt(user.getShoppingCart.getPriceNetto) €</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>Versandkosten</td>
+          <td>@fmt(user.getShoppingCart.getVersandkosten) €</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>Versandkosten</td>
+          <td>@fmt(user.getShoppingCart.getMwst) €</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td><strong>Endpreis<strong></td>
+          <td><strong>@fmt(user.getShoppingCart.getPriceBrutto) €<strong></td>
+        </tr>
+      </tbody>
+    </table>

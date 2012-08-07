@@ -1,0 +1,77 @@
+@(user: models.User)
+
+@import views.html.oc_helper.bootstrap2._
+@import views.html.oc_helper._ 
+
+@loggedin_main() {
+    
+        <div class="span9">
+
+            <div class="page-header">
+              <h1>Kasse</h1>
+            </div>
+            
+            @_shoppingCart(user)
+
+
+      <form class="form-horizontal" action="/shopping/order" method="post">
+        <fieldset>
+        
+          <br/>
+          <h2>Versandinfos</h2>
+        
+          <div class="control-group">
+            <label class="control-label">Empfänger</label>
+            <div class="controls">
+              <input type="text" >
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" >Strasse / Nr</label>
+            <div class="controls">
+              <input type="text" >
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" >PLZ / Ort</label>
+            <div class="controls">
+              <input type="text" >
+            </div>
+          </div>
+          
+          <br/>
+          <h2>Bezahlinfos</h2>
+          
+          <div class="control-group">
+            <label class="control-label" >Kontonr</label>
+            <div class="controls">
+              <input type="text" >
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" >BLZ</label>
+            <div class="controls">
+              <input type="text" >
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" >Kontoinhaber</label>
+            <div class="controls">
+              <input type="text" >
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="input01">Empfänger</label>
+            <div class="controls">
+              <input type="text"  id="input01">
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Bezahlen</button>
+          </div>
+        </fieldset>
+      </form>
+                   
+        </div>
+    
+}

@@ -6,6 +6,7 @@
 # Site
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 GET     /	                         									controllers.site.Application.index()
+POST    /	                         									controllers.site.Application.index()
 
 
 # Map static resources from the /public folder to the /assets URL path
@@ -32,8 +33,15 @@ GET 	/register														controllers.site.RegistrationController.index()
 POST 	/register														controllers.site.RegistrationController.register()
 GET 	/register/activate/:email/:hash									controllers.site.RegistrationController.activate(email: String, hash: String)
 
-# Generic Images
-GET     /ding/:id	 													controllers.site.DingController.show(id: Long)  
+# Ding
+GET     /ding/:id	 													controllers.site.DingController.show(id: Long)
+
+# Shopping
+POST    /shopping/addToShoppingCart										controllers.site.ShoppingController.addToShoppingCart()
+GET     /shopping/showShoppingCart										controllers.site.ShoppingController.showShoppingCart()
+GET     /shopping/showPayment											controllers.site.ShoppingController.showPayment()
+POST    /shopping/order													controllers.site.ShoppingController.order()
+GET     /shopping/showOrderConfirmation									controllers.site.ShoppingController.showOrderConfirmation()
 
 # only for testing login stuff => 
 GET 	/dummy															controllers.site.Application.dummy()
