@@ -72,7 +72,6 @@ public class Global extends GlobalSettings {
 	}
 
 	private String getDatabaseFile(final Application app) {
-		return app.configuration().getString("my.database.initdata.devel");
 		if (app.isDev()) return app.configuration().getString("my.database.initdata.devel"); 
 		if (app.isProd()) return app.configuration().getString("my.database.initdata.prod");
 		if (app.isTest()) return app.configuration().getString("my.database.initdata.test");
