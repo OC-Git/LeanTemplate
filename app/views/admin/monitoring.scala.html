@@ -62,8 +62,76 @@
 			<input id="groupByNodes" type="checkbox" />
 		</span>
 		
-		<span id="tab2_content">tab2</span>
-		<span id="tab3_content">tab3</span>
+		<span id="tab2_content">
+			<div class="row-fluid">
+				<div class="span3">
+					<label>Wert</label> 
+					<select id="chooseByRequestMethod" multiple="multiple">
+						<option value="requestCount">requestCount</option>
+						<option value="responseTime">responseTimeAvg</option>
+					</select>
+				</div>
+				<div class="span3">
+					<span id="chooseRequestMethodBlock">
+						<label>Request-Methode</label>
+						<span id="chooseRequestMethodSpinner">
+							<img alt="loading" src="/assets/images/spinner.gif"/>
+						</span>
+						<select id="chooseRequestMethod" multiple="multiple" >
+						</select>
+					</span>	
+				</div>
+				<div class="span3">
+					<span id="nodeBlockByRequestMethod">
+						<label>Node</label>
+						<span id="chooseNodesSpinnerByRequestMethod">
+							<img alt="loading" src="/assets/images/spinner.gif"/>
+						</span>
+						<select id="chooseNodesByRequestMethod" multiple="multiple" >
+						</select>
+					</span>				
+				</div>
+			</div>	
+			
+			<label>Nach Nodes gruppieren?</label>
+			<input id="groupByNodesByRequestMethod" type="checkbox" />
+		</span>
+		
+		<span id="tab3_content">
+			<div class="row-fluid">
+				<div class="span3">
+					<label>Wert</label> 
+					<select id="chooseByExceptionType" multiple="multiple">
+						<option value="XXX">XXX</option>
+						<option value="YYY">YYY</option>
+					</select>
+				</div>
+				<div class="span3">
+					<span id="chooseExceptionTypeBlock">
+						<label>Exception-Typ</label>
+						<span id="chooseExceptionTypeSpinner">
+							<img alt="loading" src="/assets/images/spinner.gif"/>
+						</span>
+						<select id="chooseExceptionType" multiple="multiple" >
+						</select>
+					</span>	
+				</div>
+				<div class="span3">
+					<span id="nodeBlockByExceptionType">
+						<label>Node</label>
+						<span id="chooseNodesSpinnerByExceptionType">
+							<img alt="loading" src="/assets/images/spinner.gif"/>
+						</span>
+						<select id="chooseNodesByExceptionType" multiple="multiple" >
+						</select>
+					</span>				
+				</div>
+			</div>	
+			
+			<label>Nach Nodes gruppieren?</label>
+			<input id="groupByNodesByExceptionType" type="checkbox" />
+		</span>
+		<hr/>
 				
 		<label>Aufl&ouml;sung</label>
 		<select id="chooseResolution" >
@@ -92,7 +160,7 @@
 
 		<div class="form-actions">
 			<img id="loadingButton" src="/assets/images/spinner.gif"/>
-			<input class="btn btn-primary" type="button" id="button1" value="Daten aktualisieren" />
+			<input class="btn btn-primary" type="button" id="loadDataButton" value="Daten aktualisieren" />
 		</div>        
         
 		<script type="text/javascript">
@@ -223,9 +291,9 @@
     		+ pad(date.getUTCHours()) + ":" + pad(date.getUTCMinutes()) + ":" + pad(date.getUTCSeconds());
     }
     
-    function displayNodesSlection() {
-    	var c = $("#nodeBlock");
-    	if ($("#groupByNodes").attr("checked")) {
+    function displayNodesSelection(nodeBlockId, checkboxId) {
+    	var c = $("#" + nodeBlockId);
+    	if ($("#" + checkboxId).attr("checked")) {
     		c.removeAttr("disabled");
     		c.fadeIn();
     	}
@@ -235,8 +303,20 @@
     	}
     }
     
+    function displayNodesTab1() {
+    	displayNodesSelection("nodeBlock", "groupByNodes");
+    }
+    
+    function displayNodesTab2() {
+    	displayNodesSelection("nodeBlockByRequestMethod", "groupByNodesByRequestMethod");
+    }
+
+    function displayNodesTab3() {
+    	displayNodesSelection("nodeBlockByExceptionType", "groupByNodesByExceptionType");
+    }
+    
     function loadData() {
-		$("#button1").hide();
+		$("#loadDataButton").hide();
 		$("#loadingButton").show();
 		
 		var resolution = $("#chooseResolution").val();
@@ -254,13 +334,12 @@
 			success : function(data) {
 				loadedData = data;
 				$("#loadingButton").hide();
-				$("#button1").show();
+				$("#loadDataButton").show();
 				render();
 			},
 			complete: function() {
-// 				$("#button1").removeAttr("disabled");
 				$("#loadingButton").hide();
-				$("#button1").show();
+				$("#loadDataButton").show();
 				
 			}
 		});
@@ -273,89 +352,134 @@
 			alert("ungültiges Datum=" + value);
     	}
     }
+    
 
-	$(document).ready(function() {
-		
-		//FIXME: refactor
-		$("#tab1").click(function() {
-			$("#tab1").attr("class", "active");
-			$("#tab2").removeAttr("class");
-			$("#tab3").removeAttr("class");
-			$("#tab2_content").hide();
-			$("#tab3_content").hide();
-			$("#tab1_content").fadeIn();
-		});
-		
-		$("#tab2").click(function() {
-			$("#tab2").attr("class", "active");
-			$("#tab1").removeAttr("class");
-			$("#tab3").removeAttr("class");
-			$("#tab1_content").hide();
-			$("#tab3_content").hide();
-			$("#tab2_content").fadeIn();
-			
-		});
-		
-		$("#tab3").click(function() {
-			$("#tab3").attr("class", "active");
-			$("#tab1").removeAttr("class");
-			$("#tab2").removeAttr("class");
-			$("#tab1_content").hide();
-			$("#tab2_content").hide();
-			$("#tab3_content").fadeIn();
-		});
-		
-		$("#tab2_content").hide();
-		$("#tab3_content").hide();
-		$("#loadingButton").hide();
-		$("#nodeBlock").hide();
-		
-		$("#choose").change(function() { render(); });
-		$("#chooseNodes").change(function() { render(); });
-		$("#groupByNodes").change(function() {
-			loadData();
-			displayNodesSlection();  
-		});
-		
-		$.plot($("#placeholder"), createPlotData(), plotConfig);
-		
-		var previousPoint = null;
-		$("#placeholder").bind("plothover", function (event, pos, item) {
-			if (item) {
-				if (previousPoint != item.dataIndex) {
-					previousPoint = item.dataIndex;
-					$("#tooltip").remove();
-					var x = item.datapoint[0];
-					var y = item.datapoint[1].toFixed(2);
-                    showTooltip(item.pageX, item.pageY, formatDate(new Date(x)) + " <b>" + y + "</b>");					
+	function handleTabClick(tabNr) {
+		$("#tab" + tabNr).attr("class", "active");
+		for ( var i = 1; i <= 3; i++) {
+			if (i !== tabNr) {
+				$("#tab" +i).removeAttr("class");
+				$("#tab" +i + "_content").hide();
+			}
+		}
+		$("#tab" + tabNr +"_content").fadeIn();
+	}
+	
+	function loadTab2RequestMethods() {
+		__loadList("/admin/reporting/ajax/methods", "chooseRequestMethodSpinner", "chooseRequestMethod");
+	}
+	
+	function loadTab3ExceptionTypes() {
+		__loadList("/admin/reporting/ajax/exceptions", "chooseExceptionTypeSpinner", "chooseExceptionType");
+	}
+	
+	function __loadList(url, spinnerId, selectId) {
+		$.ajax({
+			type : "GET",
+			url : url,
+			success : function(data) {
+				for ( var i = 0; i < data.length; i++) {
+					$("#" + spinnerId).hide();
+					$('#' + selectId).append('<option value="' + data[i] + '">' + data[i] + '</option>');
+					$("#" + selectId).show();
 				}
 			}
-            else {
-                $("#tooltip").remove();
-                previousPoint = null;            
-            }			
 		});
-		
-		$("#placeholder").bind("plotselected", function (event, ranges) {
-			console.log("plotselected")
-		});
-		
+	}
+	
+	function loadNodeList() {
 		$.ajax({
-			type: "GET", 
-			url: "/admin/reporting/ajax/nodes",
-			success: function(data) {
-					for (var i = 0; i < data.length; i++) {
-						$("#chooseNodesSpinner").hide();
-						$('#chooseNodes').append('<option value="' + data[i] + '">' + data[i] + '</option>');
-						$("#chooseNodes").show();
-						displayNodesSlection();
-					}
+			type : "GET",
+			url : "/admin/reporting/ajax/nodes",
+			success : function(data) {
+				for ( var i = 0; i < data.length; i++) {
+					var content = '<option value="' + data[i] + '">' + data[i] + '</option>';
+					
+					$("#chooseNodesSpinner").hide();
+					$("#chooseNodesSpinnerByRequestMethod").hide();
+					$("#chooseNodesSpinnerByExceptionType").hide();
+					
+					$('#chooseNodes').append(content);
+					$('#chooseNodesByRequestMethod').append(content);
+					$('#chooseNodesByExceptionType').append(content);
+					
+					$("#chooseNodes").show();
+					$("#chooseNodesByRequestMethod").show();
+					$("#chooseNodesByExceptionType").show();
+				}
 			}
 		});
-		
-		$("#button1").click(function() {
-			loadData();
-		});
-		
-	});
+	}
+
+	$(document).ready(
+			function() {
+				
+				// register tab clicks
+				for ( var i = 1; i <= 3; i++) {
+					$("#tab" +i).click((function(j) {
+						return function() {
+							handleTabClick(j);
+						}
+					})(i));
+				}
+				
+				$("#tab2_content").hide();
+				$("#tab3_content").hide();
+				$("#loadingButton").hide();
+				$("#nodeBlock").hide();
+				$("#nodeBlockByRequestMethod").hide();
+				$("#nodeBlockByExceptionType").hide();
+				$("#chooseRequestMethod").hide();
+				
+				$("#choose").change(function() {
+					render();
+				});
+				$("#chooseNodes").change(function() {
+					render();
+				});
+				
+				$("#groupByNodes").change(function() {
+					loadData();
+					displayNodesTab1();
+				});
+				
+				$("#groupByNodesByRequestMethod").change(function() {
+					displayNodesTab2();
+				});
+				
+				$("#groupByNodesByExceptionType").change(function() {
+					displayNodesTab3();
+				});				
+
+				$.plot($("#placeholder"), createPlotData(), plotConfig);
+
+				var previousPoint = null;
+				$("#placeholder").bind(
+						"plothover",
+						function(event, pos, item) {
+							if (item) {
+								if (previousPoint != item.dataIndex) {
+									previousPoint = item.dataIndex;
+									$("#tooltip").remove();
+									var x = item.datapoint[0];
+									var y = item.datapoint[1].toFixed(2);
+									showTooltip(item.pageX, item.pageY,
+											formatDate(new Date(x)) + " <b>"
+													+ y + "</b>");
+								}
+							} else {
+								$("#tooltip").remove();
+								previousPoint = null;
+							}
+						});
+
+				loadTab2RequestMethods();
+				loadTab3ExceptionTypes();
+				loadNodeList();
+
+				$("#loadDataButton").click(function() {
+					loadData();
+				});
+
+			});
 </script>

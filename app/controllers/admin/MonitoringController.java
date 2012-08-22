@@ -60,18 +60,6 @@ public class MonitoringController extends Controller {
 		return ok(views.html.admin.monitoring.render(df.format(fromTs), df.format(toTs)));
 	}
 
-	public static Result getDistinctNodesJson() {
-		ArrayNode nodeList = (ArrayNode) Cache.get("MonitoringController.distinctNodes");
-		if (nodeList == null) {
-			nodeList = Json.newObject().arrayNode();
-			for (final SqlRow r : Ebean.createSqlQuery("select distinct node_id as node from monitor_fine").findList()) {
-				nodeList.add(r.getString("node"));
-			}
-			Cache.set("MonitoringController.distinctNodes", nodeList, 180);
-		}
-		return ok(nodeList);
-	}
-	
 	public static Result getDateBoundariesJson() {
 		final ObjectNode node = Json.newObject();
 		final Timestamp t1, t2;  
@@ -85,6 +73,40 @@ public class MonitoringController extends Controller {
 		node.put("startTimestampMillis", t1.getTime());
 		node.put("endTimestampMillis", t2.getTime());
 		return ok(node);
+	}
+	
+	public static Result getDistinctNodesJson() {
+		return loadDistinctStuff("select distinct node_id as node from monitor_fine", "node",
+				"MonitoringController.distinctNodes");
+	}
+	
+	public static Result getRequestMethodsJson() {
+		return loadDistinctStuff("select distinct request_method as method from monitor_response_time_fine", "method",
+				"MonitoringController.distinctRequestMethods");
+	}
+	
+	public static Result getExceptionTypesJson() {
+		return loadDistinctStuff("select distinct exception_type as type from monitor_exceptions_fine", "type",
+				"MonitoringController.distinctExceptionTypes");
+	}
+	
+	private static Result loadDistinctStuff(final String query, final String paraName, final String cacheToken) {
+		ArrayNode nodeList = (ArrayNode) Cache.get(cacheToken);
+		if (nodeList == null) {
+			nodeList = Json.newObject().arrayNode();
+			for (final SqlRow r : Ebean.createSqlQuery(query).findList()) {
+				nodeList.add(r.getString(paraName));
+			}
+			Cache.set(cacheToken, nodeList, 180);
+		}
+		
+		//FIXME: remove me !! 
+		try {
+			Thread.sleep(4000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return ok(nodeList);
 	}
 	
 	public static Result statsJson(final String from, final String to, final String resolutionName, final String byNode) throws IOException {

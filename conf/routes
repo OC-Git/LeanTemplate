@@ -91,6 +91,8 @@ GET /admin/reporting/test/create										controllers.admin.TestController.creat
 
 GET /admin/reporting													controllers.admin.MonitoringController.index()
 GET /admin/reporting/ajax/nodes											controllers.admin.MonitoringController.getDistinctNodesJson()
+GET /admin/reporting/ajax/methods										controllers.admin.MonitoringController.getRequestMethodsJson()
+GET /admin/reporting/ajax/exceptions									controllers.admin.MonitoringController.getExceptionTypesJson()
 GET /admin/reporting/ajax/dateBoundaries								controllers.admin.MonitoringController.getDateBoundariesJson()
 GET /admin/reporting/ajax/stats											controllers.admin.MonitoringController.statsJson(from,to,res,byNode)
 #--------------------------------------------------------------------------------------------------------------------------------------------------
