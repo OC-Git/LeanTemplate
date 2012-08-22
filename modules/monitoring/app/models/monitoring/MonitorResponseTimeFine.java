@@ -17,6 +17,7 @@ public class MonitorResponseTimeFine extends Model {
 	private String nodeId;
 	private String requestMethod;
 	private long responseTime;
+	private long requestCount;
 
 	public static final Finder<Long, MonitorResponseTimeFine> find = new Finder<Long, MonitorResponseTimeFine>(
 			Long.class, MonitorResponseTimeFine.class);
@@ -60,6 +61,14 @@ public class MonitorResponseTimeFine extends Model {
 	public void setResponseTime(long _responseTime) {
 		responseTime = _responseTime;
 	}
+	
+	public void setRequestCount(long requestCount) {
+		this.requestCount = requestCount;
+	}
+
+	public long getRequestCount() {
+		return requestCount;
+	}	
 
 	@Override
 	public int hashCode() {
@@ -86,5 +95,7 @@ public class MonitorResponseTimeFine extends Model {
 		return "MonitorResponseTimeFine [id=" + id + ", timestamp=" + timestamp + ", nodeId=" + nodeId
 				+ ", requestMethod=" + requestMethod + ", responseTime=" + responseTime + "]";
 	}
+
+
 
 }

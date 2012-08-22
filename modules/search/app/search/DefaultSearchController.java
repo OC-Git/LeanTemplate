@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryParser.MultiFieldQueryParser;
 import org.apache.lucene.queryParser.ParseException;
@@ -47,6 +48,10 @@ public class DefaultSearchController extends Controller {
 			parser.setAllowLeadingWildcard(true);
 			parser.setDefaultOperator(Operator.AND);
 
+//			final String wildcardQuery = q.replaceAll("\\s+|$", "* ");
+//			JOptionPane.showMessageDialog(null, "Q=" + wildcardQuery);
+			 
+			
 			final Query query = parser.parse(q);
 			final TopDocs top = searcher.search(query, null, maxRows);
 			final ScoreDoc[] hits = top.scoreDocs;

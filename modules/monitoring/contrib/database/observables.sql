@@ -39,6 +39,7 @@ create table monitor_response_time_fine (
 	node_id					varchar(255) not null,
 	request_method			text not null, 
 	response_time			int not null,
+	request_count			int not null, 
 	constraint pk_monitor_response_time_fine primary key (id)
 );
 

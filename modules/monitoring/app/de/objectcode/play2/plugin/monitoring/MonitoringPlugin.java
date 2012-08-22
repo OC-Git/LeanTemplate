@@ -25,6 +25,7 @@ public class MonitoringPlugin extends Plugin {
 	public static final String DEFAULT_CLASS_HEAP_MEMORY_INFO_ADAPTER = "de.objectcode.play2.plugin.monitoring.infoadapter.impl.DefaultHeapMemoryInfoAdapter";
 	public static final String DEFAULT_CLASS_GC_INFO_ADAPTER = "de.objectcode.play2.plugin.monitoring.infoadapter.impl.DefaultGcInfoAdapter";
 	public static final String DEFAULT_CLASS_DB_INFO_ADAPTER = "de.objectcode.play2.plugin.monitoring.infoadapter.impl.BoneCPInfoAdapter";
+	public static final String DEFAULT_CLASS_AGGREGATOR_PERSISTER = "de.objectcode.play2.plugin.monitoring.EbeanAggregatorPersister";
 
 	private Application application;
 	public static boolean requestLogginEnabled;
@@ -62,7 +63,7 @@ public class MonitoringPlugin extends Plugin {
 	public void onStart() {
 
 		final Configuration conf = application.configuration().getConfig("monitoring");
-		if (conf == null) return;
+		if (conf == null || conf.keys().isEmpty()) return;
 
 		if (conf.getBoolean("enable_request_logging_db")) MonitoringPlugin.requestLogginEnabled = true;
 
@@ -95,10 +96,13 @@ public class MonitoringPlugin extends Plugin {
 		final DbInfoAdapter dbInfoAdapter = configureInfoAdapter(conf, "class.dbInfoAdapter",
 				DEFAULT_CLASS_DB_INFO_ADAPTER, DbInfoAdapter.class);
 
+		final AggregatorPersister aggregatorPersister = configureInfoAdapter(conf, "class.aggregatorPersister",
+				DEFAULT_CLASS_AGGREGATOR_PERSISTER, AggregatorPersister.class);
+		
 		final LoadAverageAggregator loadAverageAggregator = new LoadAverageAggregator(loadAverageInfoAdapter);
 
 		final Aggregator agg = new Aggregator(threadInfoAdapter, swapInfoAdapter, nodeInfoAdapter,
-				loadAverageAggregator, heapMemoryInfoAdapter, gcInfoAdapter, dbInfoAdapter);
+				loadAverageAggregator, heapMemoryInfoAdapter, gcInfoAdapter, dbInfoAdapter, aggregatorPersister);
 
 		Aggregator.set(agg);
 

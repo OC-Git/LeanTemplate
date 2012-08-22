@@ -62,9 +62,9 @@
     <link rel="stylesheet" media="screen" href="/assets/stylesheets/bootstrap-fixes.css">
 
     
-    @if(global.AppConfigResolver.getPlain(global.AppConfigResolver.PARA_MY_PROFILE_NAME).toString() == "prod") {
-    	<script src="/assets/javascripts/analytics.js"></script>
-    }
+    @** @if(global.AppConfigResolver.getPlain(global.AppConfigResolver.PARA_MY_PROFILE_NAME).toString() == "prod") { **@ 
+    @**	<script src="/assets/javascripts/analytics.js"></script> **@
+    @** } **@
   </head>
 
   <body>

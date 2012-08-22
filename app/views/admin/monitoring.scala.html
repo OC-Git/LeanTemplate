@@ -1,0 +1,361 @@
+@(initStartDate: String, initEndDate : String) 
+
+@import views.html.helper._ 
+
+@loggedin_main() {
+
+<script src="/assets/javascripts/jquery.flot.js"></script>
+
+<div class="span10">
+	<div class="row-fluid">
+	
+		<div class="span12">
+		    <div class="page-header">
+		      <h1>
+		        SystemMonitor
+		      </h1>
+		    </div>
+		  </div>
+
+		<ul class="nav nav-tabs">
+			<li id="tab1" class="active">
+				<a href="#">Monitor</a>
+			</li>
+			<li id="tab2">
+				<a href="#">Nach Request-Methode</a>
+			</li>
+			<li id="tab3">
+				<a href="#">Nach Exception-Typ</a>
+			</li>
+		</ul>
+
+		<span id="tab1_content">
+			<div class="row-fluid">
+				<div class="span3">
+					<label>Wert</label> 
+					<select id="choose" multiple="multiple">
+						<option value="requestCount">requestCount</option>
+						<option value="responseTimeAvg">responseTimeAvg</option>
+						<option value="exceptionsSum">exceptionsSum</option>
+						<option value="dbConnectionsOpen">dbConnectionsOpen</option>
+						<option value="dbConnectionsLeased">dbConnectionsLeased</option>
+						<option value="gcCount">gcCount</option>
+						<option value="gcTimeAvg">gcTimeAvg</option>
+						<option value="loadAvg">loadAvg</option>
+						<option value="threadCount">threadCount</option>
+						<option value="testData">testData</option>
+					</select>
+				</div>
+				<div class="span9">
+					<span id="nodeBlock">
+						<label>Node</label>
+						<span id="chooseNodesSpinner">
+							<img alt="loading" src="/assets/images/spinner.gif"/>
+						</span>
+						<select id="chooseNodes" multiple="multiple" >
+						</select>
+					</span>				
+				</div>
+			</div>
+			
+			<label>Nach Nodes gruppieren?</label>
+			<input id="groupByNodes" type="checkbox" />
+		</span>
+		
+		<span id="tab2_content">tab2</span>
+		<span id="tab3_content">tab3</span>
+				
+		<label>Aufl&ouml;sung</label>
+		<select id="chooseResolution" >
+			<option value="MINUTE">Minute</option>
+			<option selected="selected" value="HOUR">Stunde</option>
+			<option value="DAY">Tag</option>
+			<option value="MONTH">Monat</option>
+			<option value="YEAR">Jahr</option>
+		</select>
+		
+		<!-- TIMESTAMP -->
+		<input type="text" id="timestamp1" value="@{initStartDate} 00:00:00" name="timestamp" style="display: none;">
+		<input type="text" id="timestamp2" value="@{initEndDate} 00:00:00" name="timestamp" style="display: none;">
+		
+		<label>Ab Datum</label>
+	    <span class="input-append">
+		    <input type="date" id="id-date1" value="@initStartDate" class="input-medium" style="width:82px" ><span class="add-on"><i class="icon-calendar"></i></span>
+		    <input type="time" id="id-time1" value="00:00:00" class="input-mini" ><span class="add-on"><i class="icon-time"></i></span>
+        </span>
+        
+        <label>Bis Datum</label>
+	    <span class="input-append">
+		    <input type="date" id="id-date2" value="@initEndDate" class="input-medium" style="width:82px" ><span class="add-on"><i class="icon-calendar"></i></span>
+		    <input type="time" id="id-time2" value="00:00:00" class="input-mini" ><span class="add-on"><i class="icon-time"></i></span>
+        </span>
+
+		<div class="form-actions">
+			<img id="loadingButton" src="/assets/images/spinner.gif"/>
+			<input class="btn btn-primary" type="button" id="button1" value="Daten aktualisieren" />
+		</div>        
+        
+		<script type="text/javascript">
+		
+			function bla_id_onChange1() {
+				bla_id_onChange("1");
+			}
+			function bla_id_onChange2() {
+				bla_id_onChange("2");
+			}
+		
+			function bla_id_onChange(id) {
+				var date = $('#id-date' + id).val();
+				var time = $('#id-time' + id).val();
+				if (time=="") {
+					time="00:00";
+				}
+				if (time.length==5) {
+					time+=":00"
+				}
+				$('#timestamp' + id).val(date+" "+time);
+			}
+			$('#id-date1').change(bla_id_onChange1);
+			$('#id-time1').change(bla_id_onChange1);
+			
+			$('#id-date2').change(bla_id_onChange2);
+			$('#id-time2').change(bla_id_onChange2);
+			
+		</script>
+		<!-- END-OF-TIMESTAMP -->
+		<div id="placeholder" style="width: 100%; height: 300px">
+		</div>
+	</div>
+</div>
+<!--/span-->
+
+}
+
+<script>
+	var loadedData = null; 
+	
+	var plotConfig = {
+			xaxis: {
+				mode: 'time',
+				legend: { position: 'ne' }
+// 				minTickSize: [30, "minute"],
+// 				tickSize: [10, "minute"],
+			},
+			selection: { mode : "x" },
+			series: {
+				lines: { show: true}, 
+				points: { show: true}
+			},
+			grid: { hoverable: true, clickable: true }
+	};	
+	
+	function createPlotData() {
+		if (typeof loadedData === 'undefined') return [ [ [], [] ] ];
+		
+		var outerArr = [];
+		var chooseCrit = $("#choose").val(); 
+		var nodes  = $("#chooseNodes").val();
+		var groupByNodes = $("#groupByNodes").attr("checked");
+		
+		if (defined(groupByNodes)) {
+			// for earch nodeId call iterateCriteria()
+			for (var i=0; i < nodes.length; i++) {
+				iterateCriteria(nodes[i], chooseCrit, outerArr);
+			}
+		}
+		else {
+			iterateCriteria(null, chooseCrit, outerArr);
+		}
+		return outerArr;
+	}
+	
+	function iterateCriteria(nodeId, chooseCrit, xouterArr) {
+		if (loadedData == null) return; 
+		
+		var prefix = nodeId != null ? nodeId : ' ';
+		var counter = 0; 
+		for (var select in chooseCrit) { // criteria 
+			var seqArr = [];
+			for (var i = 0; i < loadedData.length; i++) {
+				var d = loadedData[i];
+				if (nodeId != null && !(nodeId === d["nodeId"])) continue;
+				seqArr.push([d["timestampMillis"], d[chooseCrit[select]] ]);
+			}
+			
+			xouterArr.push({
+				data: seqArr, 
+				label: prefix + chooseCrit[select] 
+			});
+		}
+	}
+	
+	function defined(value) {
+		if (value == null) return false;
+		if (typeof value === 'undefined') return false; 
+		return true;
+	}
+	
+	function render() {
+		if (loadedData == null) loadData();
+		$.plot($("#placeholder"), createPlotData(), plotConfig);
+	}
+	
+    function showTooltip(x, y, contents) {
+        $('<div id="tooltip">' + contents + '</div>').css( {
+            position: 'absolute',
+            display: 'none',
+            top: y + 5,
+            left: x + 5,
+            border: '1px solid #fdd',
+            padding: '2px',
+            'background-color': '#fee',
+            opacity: 0.80
+        }).appendTo("body").fadeIn(200);
+    }
+    
+	function pad(val) {
+		if (val.toString().length === 1) return "0" + val; 
+		return val;
+	}    
+    
+    function formatDate(date) {
+    	return date.getUTCDate() + "." + (date.getUTCMonth() +1 )+ "." + date.getUTCFullYear() + " " 
+    		+ pad(date.getUTCHours()) + ":" + pad(date.getUTCMinutes()) + ":" + pad(date.getUTCSeconds());
+    }
+    
+    function displayNodesSlection() {
+    	var c = $("#nodeBlock");
+    	if ($("#groupByNodes").attr("checked")) {
+    		c.removeAttr("disabled");
+    		c.fadeIn();
+    	}
+    	else {
+    		c.attr("disabled", "disabled");
+    		c.fadeOut();
+    	}
+    }
+    
+    function loadData() {
+		$("#button1").hide();
+		$("#loadingButton").show();
+		
+		var resolution = $("#chooseResolution").val();
+		var groupByNodes = $("#groupByNodes").attr("checked") ? '1' : '0';
+		var fromDate = Date.parse($("#timestamp1").val().replace(" ", "T"));
+		var toDate = Date.parse($("#timestamp2").val().replace(" ", "T")); 
+		
+		//FIXME: 
+		dateError(fromDate);
+		dateError(toDate);
+		
+		$.ajax({
+			type : "GET",
+			url : "/admin/reporting/ajax/stats?from=" + fromDate + "&to=" + toDate + "&res=" + resolution + "&byNode=" + groupByNodes,
+			success : function(data) {
+				loadedData = data;
+				$("#loadingButton").hide();
+				$("#button1").show();
+				render();
+			},
+			complete: function() {
+// 				$("#button1").removeAttr("disabled");
+				$("#loadingButton").hide();
+				$("#button1").show();
+				
+			}
+		});
+    }
+    
+    function dateError(value, id) {
+    	if (! defined(value) || isNaN(value)) {
+//     		$("#" + id).animate( {
+//     		});
+			alert("ungültiges Datum=" + value);
+    	}
+    }
+
+	$(document).ready(function() {
+		
+		//FIXME: refactor
+		$("#tab1").click(function() {
+			$("#tab1").attr("class", "active");
+			$("#tab2").removeAttr("class");
+			$("#tab3").removeAttr("class");
+			$("#tab2_content").hide();
+			$("#tab3_content").hide();
+			$("#tab1_content").fadeIn();
+		});
+		
+		$("#tab2").click(function() {
+			$("#tab2").attr("class", "active");
+			$("#tab1").removeAttr("class");
+			$("#tab3").removeAttr("class");
+			$("#tab1_content").hide();
+			$("#tab3_content").hide();
+			$("#tab2_content").fadeIn();
+			
+		});
+		
+		$("#tab3").click(function() {
+			$("#tab3").attr("class", "active");
+			$("#tab1").removeAttr("class");
+			$("#tab2").removeAttr("class");
+			$("#tab1_content").hide();
+			$("#tab2_content").hide();
+			$("#tab3_content").fadeIn();
+		});
+		
+		$("#tab2_content").hide();
+		$("#tab3_content").hide();
+		$("#loadingButton").hide();
+		$("#nodeBlock").hide();
+		
+		$("#choose").change(function() { render(); });
+		$("#chooseNodes").change(function() { render(); });
+		$("#groupByNodes").change(function() {
+			loadData();
+			displayNodesSlection();  
+		});
+		
+		$.plot($("#placeholder"), createPlotData(), plotConfig);
+		
+		var previousPoint = null;
+		$("#placeholder").bind("plothover", function (event, pos, item) {
+			if (item) {
+				if (previousPoint != item.dataIndex) {
+					previousPoint = item.dataIndex;
+					$("#tooltip").remove();
+					var x = item.datapoint[0];
+					var y = item.datapoint[1].toFixed(2);
+                    showTooltip(item.pageX, item.pageY, formatDate(new Date(x)) + " <b>" + y + "</b>");					
+				}
+			}
+            else {
+                $("#tooltip").remove();
+                previousPoint = null;            
+            }			
+		});
+		
+		$("#placeholder").bind("plotselected", function (event, ranges) {
+			console.log("plotselected")
+		});
+		
+		$.ajax({
+			type: "GET", 
+			url: "/admin/reporting/ajax/nodes",
+			success: function(data) {
+					for (var i = 0; i < data.length; i++) {
+						$("#chooseNodesSpinner").hide();
+						$('#chooseNodes').append('<option value="' + data[i] + '">' + data[i] + '</option>');
+						$("#chooseNodes").show();
+						displayNodesSlection();
+					}
+			}
+		});
+		
+		$("#button1").click(function() {
+			loadData();
+		});
+		
+	});
+</script>

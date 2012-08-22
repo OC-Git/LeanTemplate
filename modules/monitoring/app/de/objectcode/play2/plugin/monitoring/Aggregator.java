@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JOptionPane;
-
 import models.monitoring.MonitorExceptionsFine;
 import models.monitoring.MonitorFine;
 import models.monitoring.MonitorResponseTimeFine;
@@ -35,6 +33,7 @@ public class Aggregator implements Runnable {
 	private HeapMemoryInfoAdapter heapMemoryInfoAdapter;
 	private GcInfoAdapter gcInfoAdapter;
 	private DbInfoAdapter dbInfoAdapter;
+	private AggregatorPersister aggregatorPersister;
 
 	private long lastGcCollectionCount;
 	private long lastGcTime;
@@ -45,6 +44,7 @@ public class Aggregator implements Runnable {
 
 	private Map<Class<? extends Throwable>, Integer> exceptionTypeCounterMap;
 	private Map<String, Tupel<Long, Integer>> fineRequestDurationMap;
+
 	
 	private static class Tupel<V1, V2> {
 		public V1 value1; 
@@ -53,7 +53,7 @@ public class Aggregator implements Runnable {
 	
 	protected Aggregator(ThreadInfoAdapter _threadInfoAdapter, SwapInfoAdapter _swapInfoAdapter,
 			NodeInfoAdapter _nodeInfoAdapter, LoadAverageAggregator _loadAverageAggregator,
-			HeapMemoryInfoAdapter _heapMemoryInfoAdapter, GcInfoAdapter _gcInfoAdapter, DbInfoAdapter _dbInfoAdapter) {
+			HeapMemoryInfoAdapter _heapMemoryInfoAdapter, GcInfoAdapter _gcInfoAdapter, DbInfoAdapter _dbInfoAdapter, AggregatorPersister _aggregatorPersister) {
 
 		threadInfoAdapter = _threadInfoAdapter;
 		swapInfoAdapter = _swapInfoAdapter;
@@ -62,6 +62,7 @@ public class Aggregator implements Runnable {
 		heapMemoryInfoAdapter = _heapMemoryInfoAdapter;
 		gcInfoAdapter = _gcInfoAdapter;
 		dbInfoAdapter = _dbInfoAdapter;
+		aggregatorPersister = _aggregatorPersister;
 
 		syncMutexRequestCounter = new Object();
 		syncMutexExceptionFineCounter = new Object();
@@ -122,7 +123,7 @@ public class Aggregator implements Runnable {
 	@Override
 	public void run() {
 		final String nodeId = nodeInfoAdapter.getNodeId();
-		final Timestamp now = new Timestamp(System.currentTimeMillis());		
+		final Timestamp now = new Timestamp(System.currentTimeMillis());
 
 		final MonitorFine mf = new MonitorFine();
 		mf.setNodeId(nodeId);
@@ -164,6 +165,7 @@ public class Aggregator implements Runnable {
 				f.setNodeId(nodeId);
 				f.setRequestMethod(methodName);
 				f.setResponseTime(tupel.value1 / tupel.value2);
+				f.setRequestCount(tupel.value2);
 				
 				responseFineList.add(f);
 			}
@@ -171,7 +173,8 @@ public class Aggregator implements Runnable {
 			
 		}
 
-		final List<MonitorExceptionsFine> efList = new ArrayList<MonitorExceptionsFine>(exceptionTypeCounterMap.size());
+		final List<MonitorExceptionsFine> efList = 
+			new ArrayList<MonitorExceptionsFine>(exceptionTypeCounterMap.size());
 
 		synchronized (syncMutexExceptionFineCounter) {
 			mf.setExceptionsSum(exceptionCounter);
@@ -188,20 +191,7 @@ public class Aggregator implements Runnable {
 			exceptionTypeCounterMap.clear();
 		}
 
-		try {
-			Ebean.beginTransaction();
-			mf.save();
-			for (final MonitorExceptionsFine ef : efList) {
-				ef.save();
-			}
-			for (final MonitorResponseTimeFine f : responseFineList) {
-				f.save();
-			}
-			Ebean.commitTransaction();
-		} finally {
-			Ebean.endTransaction();
-		}
-
+		aggregatorPersister.persist(mf, efList, responseFineList);
 
 	}
 

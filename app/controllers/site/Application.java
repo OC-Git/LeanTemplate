@@ -27,6 +27,8 @@ public class Application extends DefaultSearchController {
 	static int counter2;
 	
 	public static Result index() throws IOException, ParseException {
+		RequestLoggerAction.registerControllerMethod();
+		
 		final Form<SearchForm> bindForm = form.bindFromRequest();
 		if (bindForm.hasErrors()) {
 			flash().put("error", "Ungültige Suchanfrage");

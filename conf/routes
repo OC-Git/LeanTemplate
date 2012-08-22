@@ -86,6 +86,13 @@ GET		/admin/reports													controllers.admin.ReportingController.index()
 GET		/admin/reports/info/:id											controllers.admin.ReportingController.info(id: Long)
 GET 	/admin/reports/query/											controllers.admin.ReportingController.report()
 
+GET /admin/reporting/test/clear											controllers.admin.TestController.clearReportingTables()	
+GET /admin/reporting/test/create										controllers.admin.TestController.createDummyData()
+
+GET /admin/reporting													controllers.admin.MonitoringController.index()
+GET /admin/reporting/ajax/nodes											controllers.admin.MonitoringController.getDistinctNodesJson()
+GET /admin/reporting/ajax/dateBoundaries								controllers.admin.MonitoringController.getDateBoundariesJson()
+GET /admin/reporting/ajax/stats											controllers.admin.MonitoringController.statsJson(from,to,res,byNode)
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 # Common
 #--------------------------------------------------------------------------------------------------------------------------------------------------
