@@ -202,7 +202,7 @@
 <script>
 	var loadedData = null; 
 	
-	var plotConfig = {
+	var PLOT_CONFIG = {
 			xaxis: {
 				mode: 'time',
 				legend: { position: 'ne' }
@@ -217,16 +217,39 @@
 			grid: { hoverable: true, clickable: true }
 	};	
 	
+	var LOAD_CONFIG = {
+		tab1 : {
+			url: "/admin/reporting/ajax/stats",
+			checkedByNodesId : "#groupByNodes",
+			selectCriteriaId : "#choose",
+			selectNodeId     : "#chooseNodes"
+			
+		},
+		tab2 : {
+			url: "/admin/reporting/ajax/statsByRequest",
+			checkedByNodesId : "#groupByNodesByRequestMethod",
+			selectCriteriaId : "#chooseByRequestMethod",
+			selectNodeId     : "#chooseNodesByRequestMethod"
+		},
+		tab3 : {
+			url: "/admin/reporting/ajax/statsByException",
+			checkedByNodesId : "#groupByNodesByExceptionType",
+			selectCriteriaId : "#chooseByExceptionType",
+			selectNodeId     : "#chooseNodesByExceptionType"
+		}
+	};
+	
 	function createPlotData() {
-		if (typeof loadedData === 'undefined') return [ [ [], [] ] ];
+		var conf = getCurrentLoadConfig();
+		if (typeof loadedData === 'undefined' || conf == null) return [ [ [], [] ] ];
 		
 		var outerArr = [];
-		var chooseCrit = $("#choose").val(); 
-		var nodes  = $("#chooseNodes").val();
-		var groupByNodes = $("#groupByNodes").attr("checked");
+		var chooseCrit = $(conf.selectCriteriaId).val(); 
+		var groupByNodes = $(conf.checkedByNodesId).attr("checked");
 		
 		if (defined(groupByNodes)) {
 			// for earch nodeId call iterateCriteria()
+			var nodes  = $(conf.selectNodeId).val();
 			for (var i=0; i < nodes.length; i++) {
 				iterateCriteria(nodes[i], chooseCrit, outerArr);
 			}
@@ -235,7 +258,7 @@
 			iterateCriteria(null, chooseCrit, outerArr);
 		}
 		return outerArr;
-	}
+	}	
 	
 	function iterateCriteria(nodeId, chooseCrit, xouterArr) {
 		if (loadedData == null) return; 
@@ -265,7 +288,7 @@
 	
 	function render() {
 		if (loadedData == null) loadData();
-		$.plot($("#placeholder"), createPlotData(), plotConfig);
+		$.plot($("#placeholder"), createPlotData(), PLOT_CONFIG);
 	}
 	
     function showTooltip(x, y, contents) {
@@ -315,12 +338,25 @@
     	displayNodesSelection("nodeBlockByExceptionType", "groupByNodesByExceptionType");
     }
     
+    function getCurrentLoadConfig() {
+    	var activeTab = $("ul.nav.nav-tabs").children("li.active").attr("id");
+    	if (!defined(activeTab)) return null;
+    	return LOAD_CONFIG[activeTab];
+    }
+    
     function loadData() {
+    	// which tab is active -> 
+    	// 		CONFIG: 
+    	// 			- choose URL
+    	// 			- ids: groupByNodes, 
+    	//     	
+    	var conf = getCurrentLoadConfig();
+    	
 		$("#loadDataButton").hide();
-		$("#loadingButton").show();
-		
+		$("#loadingButton").show();   	
+    	
 		var resolution = $("#chooseResolution").val();
-		var groupByNodes = $("#groupByNodes").attr("checked") ? '1' : '0';
+		var groupByNodes = $(conf.checkedByNodesId).attr("checked") ? '1' : '0';
 		var fromDate = Date.parse($("#timestamp1").val().replace(" ", "T"));
 		var toDate = Date.parse($("#timestamp2").val().replace(" ", "T")); 
 		
@@ -330,7 +366,7 @@
 		
 		$.ajax({
 			type : "GET",
-			url : "/admin/reporting/ajax/stats?from=" + fromDate + "&to=" + toDate + "&res=" + resolution + "&byNode=" + groupByNodes,
+			url : conf.url + "?from=" + fromDate + "&to=" + toDate + "&res=" + resolution + "&byNode=" + groupByNodes,
 			success : function(data) {
 				loadedData = data;
 				$("#loadingButton").hide();
@@ -344,6 +380,36 @@
 			}
 		});
     }
+    
+//     function loadData_ORG() {
+// 		$("#loadDataButton").hide();
+// 		$("#loadingButton").show();
+		
+// 		var resolution = $("#chooseResolution").val();
+// 		var groupByNodes = $("#groupByNodes").attr("checked") ? '1' : '0';
+// 		var fromDate = Date.parse($("#timestamp1").val().replace(" ", "T"));
+// 		var toDate = Date.parse($("#timestamp2").val().replace(" ", "T")); 
+		
+		FIXME: 
+// 		dateError(fromDate);
+// 		dateError(toDate);
+		
+// 		$.ajax({
+// 			type : "GET",
+// 			url : "/admin/reporting/ajax/stats?from=" + fromDate + "&to=" + toDate + "&res=" + resolution + "&byNode=" + groupByNodes,
+// 			success : function(data) {
+// 				loadedData = data;
+// 				$("#loadingButton").hide();
+// 				$("#loadDataButton").show();
+// 				render();
+// 			},
+// 			complete: function() {
+// 				$("#loadingButton").hide();
+// 				$("#loadDataButton").show();
+				
+// 			}
+// 		});
+//     }
     
     function dateError(value, id) {
     	if (! defined(value) || isNaN(value)) {
@@ -451,7 +517,7 @@
 					displayNodesTab3();
 				});				
 
-				$.plot($("#placeholder"), createPlotData(), plotConfig);
+				$.plot($("#placeholder"), createPlotData(), PLOT_CONFIG);
 
 				var previousPoint = null;
 				$("#placeholder").bind(

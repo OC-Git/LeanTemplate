@@ -95,6 +95,8 @@ GET /admin/reporting/ajax/methods										controllers.admin.MonitoringControlle
 GET /admin/reporting/ajax/exceptions									controllers.admin.MonitoringController.getExceptionTypesJson()
 GET /admin/reporting/ajax/dateBoundaries								controllers.admin.MonitoringController.getDateBoundariesJson()
 GET /admin/reporting/ajax/stats											controllers.admin.MonitoringController.statsJson(from,to,res,byNode)
+GET /admin/reporting/ajax/statsByRequest								controllers.admin.MonitoringController.statsByRequestJson(from,to,res,byNode)
+GET /admin/reporting/ajax/statsByException								controllers.admin.MonitoringController.statsByExceptionJson(from,to,res,byNode)
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 # Common
 #--------------------------------------------------------------------------------------------------------------------------------------------------
