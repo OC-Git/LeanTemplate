@@ -208,7 +208,7 @@ public class MonitoringController extends Controller {
 				node.put("swapUsed", row.getLong("swap_used"));
 				node.put("gcCount", row.getLong("gc_count"));
 				node.put("gcTimeAvg", row.getLong("gc_time_avg"));
-				node.put("loadAvg", row.getLong("load_avg"));
+				node.put("loadAvg", row.getDouble("load_avg"));
 				node.put("threadCount", row.getLong("thread_count"));
 			}
 		};
@@ -228,19 +228,19 @@ public class MonitoringController extends Controller {
 				list.add(String.valueOf(fillTimestamp(printTimestamp).getTime()));
 				
 				if (groupByNodes) list.add(row.getString("node_id"));
-				list.add(row.getString("request_count"));
-				list.add(row.getString("response_time_avg"));
-				list.add(row.getString("exceptions_sum"));
-				list.add(row.getString("db_connections_open"));
-				list.add(row.getString("db_connections_leased"));
-				list.add(row.getString("heap_used"));
-				list.add(row.getString("heap_max"));
-				list.add(row.getString("heap_free"));
-				list.add(row.getString("swap_used"));
-				list.add(row.getString("gc_count"));
-				list.add(row.getString("gc_time_avg"));
-				list.add(row.getString("load_avg"));
-				list.add(row.getString("thread_count"));
+				list.add(String.valueOf(row.getLong("request_count")));
+				list.add(String.valueOf(row.getLong("response_time_avg")));
+				list.add(String.valueOf(row.getLong("exceptions_sum")));
+				list.add(String.valueOf(row.getLong("db_connections_open")));
+				list.add(String.valueOf(row.getLong("db_connections_leased")));
+				list.add(String.valueOf(row.getLong("heap_used")));
+				list.add(String.valueOf(row.getLong("heap_max")));
+				list.add(String.valueOf(row.getLong("heap_free")));
+				list.add(String.valueOf(row.getLong("swap_used")));
+				list.add(String.valueOf(row.getLong("gc_count")));
+				list.add(String.valueOf(row.getLong("gc_time_avg")));
+				list.add(String.valueOf(row.getDouble("load_avg")));
+				list.add(String.valueOf(row.getLong("thread_count")));
 				
 				return list;
 			}
@@ -282,8 +282,8 @@ public class MonitoringController extends Controller {
 				list.add(printTimestamp);
 				list.add(String.valueOf(fillTimestamp(printTimestamp).getTime()));
 				list.add(row.getString("request_method"));
-				list.add(row.getString("request_count"));
-				list.add(row.getString("response_time"));
+				list.add(String.valueOf(row.getLong("request_count")));
+				list.add(String.valueOf(row.getLong("response_time")));
 				
 				return list;
 			}
@@ -319,7 +319,7 @@ public class MonitoringController extends Controller {
 				list.add(printTimestamp);
 				list.add(String.valueOf(fillTimestamp(printTimestamp).getTime()));
 				list.add(row.getString("exception_type"));
-				list.add(row.getString("exceptions_sum"));
+				list.add(String.valueOf(row.getLong("exceptions_sum")));
 				
 				return list;
 			}
