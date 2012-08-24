@@ -43,6 +43,9 @@ import com.avaje.ebean.SqlRow;
 @Security.Authenticated(AdminSecured.class) 
 public class MonitoringController extends Controller {
 
+	private static final String MIMETYPE_APPLICATION_CSV = "application/csv";
+	private static final String MIMETYPE_APPLICATION_JSON = "application/json";
+
 	private static final String QUERY_STATS = "sum(request_count) as request_count, " +
 											  "avg(response_time_avg) as response_time_avg, " +
 											  "sum(exceptions_sum) as exceptions_sum, " +
@@ -160,6 +163,11 @@ public class MonitoringController extends Controller {
 			}
 			return nodeList.toString();
 		}
+
+		@Override
+		public String getMimeType() {
+			return MIMETYPE_APPLICATION_JSON;
+		}
 	}
 	
 	private static class DefaultCsvPerformer implements Callback {
@@ -184,6 +192,11 @@ public class MonitoringController extends Controller {
 				IOUtils.closeQuietly(csvWriter);
 			}
 			return writer.toString();
+		}
+
+		@Override
+		public String getMimeType() {
+			return MIMETYPE_APPLICATION_CSV;
 		}
 	}
 	
@@ -245,7 +258,6 @@ public class MonitoringController extends Controller {
 				return list;
 			}
 		};
-		
 		return stats(from, to, resolutionName, byNode, QUERY_STATS, null, new DefaultCsvPerformer(csvPopulator));
 	}
 
@@ -370,11 +382,12 @@ public class MonitoringController extends Controller {
 		final List<SqlRow> rowList = Ebean.createSqlQuery(bf.toString()).setParameter("from_date", fromTs)
 				.setParameter("to_date", toTs).findList();
 
-		return (deflateJson(callback.call(rowList, groupByNodes)));
+		return (deflate(callback.call(rowList, groupByNodes), callback.getMimeType()));
 	}
 	
 	private static interface Callback {
 		String call(List<SqlRow> rowList, boolean groupByNodes) throws IOException;
+		String getMimeType();
 	}
 	
 	private static interface JsonPopulator {
@@ -385,7 +398,7 @@ public class MonitoringController extends Controller {
 		List<String> call(SqlRow row, boolean groupByNodes);
 	}
 	
-	private static Result deflateJson(final String jsonText) throws IOException {
+	private static Result deflate(final String content, final String contentType) throws IOException {
 		final Request request = request();
 		final String acceptEncoding = request.getHeader("Accept-Encoding");
 		
@@ -394,10 +407,10 @@ public class MonitoringController extends Controller {
 			OutputStream gzipOutputStream = null;
 			
 			try {
-				out = new ByteArrayOutputStream((int) (jsonText.length() * 0.75));
+				out = new ByteArrayOutputStream((int) (content.length() * 0.75));
 				gzipOutputStream = new DeflaterOutputStream(out);
 				
-				gzipOutputStream.write(jsonText.getBytes("UTF-8"));
+				gzipOutputStream.write(content.getBytes("UTF-8"));
 			}
 			finally {
 				IOUtils.closeQuietly(gzipOutputStream);
@@ -405,13 +418,13 @@ public class MonitoringController extends Controller {
 			}
 			
 			final byte[] byteArray = out.toByteArray();
-			response().setContentType("application/json");
+			response().setContentType(contentType);
 			response().setHeader("Content-Encoding", "deflate");
 			response().setHeader("Content-Length", byteArray.length + "");
 			
 			return ok(byteArray);
 		}
-		return ok(jsonText);
+		return ok(content);
 	}
 	
 	private static Timestamp fillTimestamp(final String pts) {

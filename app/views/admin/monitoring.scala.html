@@ -432,7 +432,7 @@
     
     function exportCsv() {
 		performStatsPara(function(conf, resolution, groupByNodes, fromDate, toDate) {
-			var url = "/admin/reporting/csvTest" + "?from=" + fromDate + 
+			var url = conf.url + "Csv" + "?from=" + fromDate + 
 					"&to=" + toDate + 
 					"&res=" + resolution + 
 					"&byNode=" + groupByNodes + 
