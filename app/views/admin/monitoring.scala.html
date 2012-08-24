@@ -158,9 +158,19 @@
         </span>
 
 		<div class="form-actions">
-			<img id="loadingButton" src="/assets/images/spinner.gif"/>
-			<input class="btn btn-primary" type="button" id="loadDataButton" value="Daten aktualisieren" />
-		</div>        
+			<div class="row-fluid">
+				<div class="span6">
+					<img id="loadingButton" src="/assets/images/spinner.gif"/>
+					<input class="btn btn-primary" type="button" id="loadDataButton" value="Daten aktualisieren" />
+				</div>				
+				<div class="span6 pagination-right">	
+					<input class="btn btn-info" type="button" id="exportCsv" value="CSV Datei exportieren" />
+				</div>
+			</div>
+		</div>    
+		
+		<div id="iframe" style="display: none;">
+		</div>    
         
 		<script type="text/javascript">
 		
@@ -395,11 +405,43 @@
     	}
     }
     
-    function loadData() {
+    function loadData() {		
+		performStatsPara(function(conf, resolution, groupByNodes, fromDate, toDate) {
+			$("#loadingButton").show();
+			$("#loadDataButton").hide();
+			
+			$.ajax({
+				type : "GET",
+				url : conf.url + "?from=" + fromDate + "&to=" + toDate + "&res=" + resolution + "&byNode=" + groupByNodes,
+				success : function(data) {
+					conf.loadedData = data;
+					$("#loadingButton").hide();
+					$("#loadDataButton").show();
+					render();
+				},
+				complete: function() {
+					$("#loadingButton").hide();
+					$("#loadDataButton").show();
+					
+				}
+			});
+		});
+    }
+    
+    function exportCsv() {
+		performStatsPara(function(conf, resolution, groupByNodes, fromDate, toDate) {
+			var url = "/admin/reporting/csvTest" + "?from=" + fromDate + 
+					"&to=" + toDate + 
+					"&res=" + resolution + 
+					"&byNode=" + groupByNodes + 
+					"&nocache=" + Date.parse(new Date());
+			
+			$("#iframe").html('<iframe src="' + url + '"/>');
+		});
+    }
+    
+    function performStatsPara(callback) {
     	var conf = getCurrentLoadConfig();
-    	
-		$("#loadDataButton").hide();
-		$("#loadingButton").show();   	
     	
 		var resolution = $("#chooseResolution").val();
 		var groupByNodes = $(conf.checkedByNodesId).attr("checked") ? '1' : '0';
@@ -409,24 +451,11 @@
 		
 		//FIXME: 
 		dateError(fromDate);
-		dateError(toDate);
+		dateError(toDate); 
 		
-		$.ajax({
-			type : "GET",
-			url : conf.url + "?from=" + fromDate + "&to=" + toDate + "&res=" + resolution + "&byNode=" + groupByNodes,
-			success : function(data) {
-				conf.loadedData = data;
-				$("#loadingButton").hide();
-				$("#loadDataButton").show();
-				render();
-			},
-			complete: function() {
-				$("#loadingButton").hide();
-				$("#loadDataButton").show();
-				
-			}
-		});
+		callback(conf, resolution, groupByNodes, fromDate, toDate);
     }
+    
     
     function dateError(value, id) {
     	if (! defined(value) || isNaN(value)) {
@@ -582,9 +611,9 @@
 				loadTab3ExceptionTypes();
 				loadNodeList();
 
-				$("#loadDataButton").click(function() {
-					loadData();
-				});
+				$("#loadDataButton").click(loadData);
+				$("#exportCsv").click(exportCsv);
+				
 
 			});
 </script>
