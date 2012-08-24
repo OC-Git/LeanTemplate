@@ -102,8 +102,7 @@
 				<div class="span3">
 					<label>Wert</label> 
 					<select id="chooseByExceptionType" multiple="multiple">
-						<option value="XXX">XXX</option>
-						<option value="YYY">YYY</option>
+						<option value="exceptionsSum">exceptionsSum</option>
 					</select>
 				</div>
 				<div class="span3">
@@ -135,9 +134,9 @@
 				
 		<label>Aufl&ouml;sung</label>
 		<select id="chooseResolution" >
-			<option value="MINUTE">Minute</option>
-			<option selected="selected" value="HOUR">Stunde</option>
-			<option value="DAY">Tag</option>
+			<option id="resolutionMinute" value="MINUTE">Minute</option>
+			<option id="resolutionHour" selected="selected" value="HOUR">Stunde</option>
+			<option id="resolutionDay" value="DAY">Tag</option>
 			<option value="MONTH">Monat</option>
 			<option value="YEAR">Jahr</option>
 		</select>
@@ -165,29 +164,31 @@
         
 		<script type="text/javascript">
 		
-			function bla_id_onChange1() {
-				bla_id_onChange("1");
+			function ts_id_onChange1() {
+				ts_id_onChange("1");
+				checkDisableResolutionMinute();
 			}
-			function bla_id_onChange2() {
-				bla_id_onChange("2");
+			function ts_id_onChange2() {
+				ts_id_onChange("2");
+				checkDisableResolutionMinute();
 			}
 		
-			function bla_id_onChange(id) {
+			function ts_id_onChange(id) {
 				var date = $('#id-date' + id).val();
 				var time = $('#id-time' + id).val();
 				if (time=="") {
 					time="00:00";
 				}
 				if (time.length==5) {
-					time+=":00"
+					time+=":00";
 				}
 				$('#timestamp' + id).val(date+" "+time);
 			}
-			$('#id-date1').change(bla_id_onChange1);
-			$('#id-time1').change(bla_id_onChange1);
+			$('#id-date1').change(ts_id_onChange1);
+			$('#id-time1').change(ts_id_onChange1);
 			
-			$('#id-date2').change(bla_id_onChange2);
-			$('#id-time2').change(bla_id_onChange2);
+			$('#id-date2').change(ts_id_onChange2);
+			$('#id-time2').change(ts_id_onChange2);
 			
 		</script>
 		<!-- END-OF-TIMESTAMP -->
@@ -200,8 +201,6 @@
 }
 
 <script>
-	var loadedData = null; 
-	
 	var PLOT_CONFIG = {
 			xaxis: {
 				mode: 'time',
@@ -222,62 +221,96 @@
 			url: "/admin/reporting/ajax/stats",
 			checkedByNodesId : "#groupByNodes",
 			selectCriteriaId : "#choose",
-			selectNodeId     : "#chooseNodes"
-			
+			selectNodeId     : "#chooseNodes",
+			filterIds : [ ], 
+			loadedData: null
 		},
 		tab2 : {
 			url: "/admin/reporting/ajax/statsByRequest",
 			checkedByNodesId : "#groupByNodesByRequestMethod",
-			selectCriteriaId : "#chooseByRequestMethod",
-			selectNodeId     : "#chooseNodesByRequestMethod"
+			selectCriteriaId: "#chooseByRequestMethod",
+			selectNodeId     : "#chooseNodesByRequestMethod",
+			filterIds : [
+			             { 
+			            	 id: "#chooseRequestMethod",
+			            	 jsonName: "requestMethod"
+			             }
+			], 
+			loadedData: null
 		},
 		tab3 : {
 			url: "/admin/reporting/ajax/statsByException",
 			checkedByNodesId : "#groupByNodesByExceptionType",
 			selectCriteriaId : "#chooseByExceptionType",
-			selectNodeId     : "#chooseNodesByExceptionType"
+			selectNodeId     : "#chooseNodesByExceptionType",
+			filterIds : [
+			             { 
+			            	 id: "#chooseExceptionType",
+			            	 jsonName: "exceptionType"
+			             }
+			],
+			loadedData: null
 		}
 	};
 	
 	function createPlotData() {
 		var conf = getCurrentLoadConfig();
-		if (typeof loadedData === 'undefined' || conf == null) return [ [ [], [] ] ];
+		if (conf == null | ! defined(conf.loadedData)) return [ [ [], [] ] ];	
+		
+		// make private copy of config
+		var copyFilterIds = conf.filterIds.slice();
+		var criteriaValueList = $(conf.selectCriteriaId).val(); 
+		
+		// use nodes as criteria ? 
+		var groupByNodes = $(conf.checkedByNodesId).attr("checked");
+		if (groupByNodes) copyFilterIds.push({ id: conf.selectNodeId, jsonName: "nodeId" });
 		
 		var outerArr = [];
-		var chooseCrit = $(conf.selectCriteriaId).val(); 
-		var groupByNodes = $(conf.checkedByNodesId).attr("checked");
+		var labels = []; 
+		var hash = {};
 		
-		if (defined(groupByNodes)) {
-			// for earch nodeId call iterateCriteria()
-			var nodes  = $(conf.selectNodeId).val();
-			for (var i=0; i < nodes.length; i++) {
-				iterateCriteria(nodes[i], chooseCrit, outerArr);
-			}
-		}
-		else {
-			iterateCriteria(null, chooseCrit, outerArr);
-		}
-		return outerArr;
-	}	
-	
-	function iterateCriteria(nodeId, chooseCrit, xouterArr) {
-		if (loadedData == null) return; 
-		
-		var prefix = nodeId != null ? nodeId : ' ';
-		var counter = 0; 
-		for (var select in chooseCrit) { // criteria 
-			var seqArr = [];
-			for (var i = 0; i < loadedData.length; i++) {
-				var d = loadedData[i];
-				if (nodeId != null && !(nodeId === d["nodeId"])) continue;
-				seqArr.push([d["timestampMillis"], d[chooseCrit[select]] ]);
-			}
+		_.each(conf.loadedData, function(data) {
+			var matches = 0;
+			var filterGroupIndex = -1;
 			
-			xouterArr.push({
-				data: seqArr, 
-				label: prefix + chooseCrit[select] 
+			_.each(copyFilterIds, function(filterIdConf) {
+				filterGroupIndex++;
+				
+				_.each($(filterIdConf.id).val(), function(filterValue) {
+					if (filterValue === data[filterIdConf.jsonName]) {
+						matches++;
+						labels[filterGroupIndex] = filterValue;
+						// FIXME: continue to next filterGroup
+					}
+				});
 			});
-		}
+			if (matches === copyFilterIds.length) {
+				var key = labels.join(" ");
+				var arr = hash[key];
+				if (! defined(arr)) {
+					arr = [];
+					hash[key] = arr; 
+				}
+				arr.push(data);
+			}
+		}); // data
+			
+		_.each(criteriaValueList, function(criteria) {
+			for (key in hash) {
+				var seqArr = [];
+				var dataList = hash[key];
+				
+				_.each(dataList, function(data) {
+					seqArr.push( [data["timestampMillis"], data[criteria] ]);
+				});
+	 			outerArr.push({
+					data: seqArr, 
+					label: criteria + " " + key 
+				});					
+			}
+		});
+		
+		return outerArr; 
 	}
 	
 	function defined(value) {
@@ -287,7 +320,8 @@
 	}
 	
 	function render() {
-		if (loadedData == null) loadData();
+		var conf = getCurrentLoadConfig();
+		if (conf.loadedData == null) loadData();
 		$.plot($("#placeholder"), createPlotData(), PLOT_CONFIG);
 	}
 	
@@ -344,12 +378,24 @@
     	return LOAD_CONFIG[activeTab];
     }
     
+    function dateToMillis(date) {
+    	return Date.parse(date.replace(" ", "T"));
+    }
+    
+    function checkDisableResolutionMinute() {
+    	var diffMillis = dateToMillis($("#timestamp2").val()) - dateToMillis($("#timestamp1").val());
+    	if (diffMillis > 1000 * 60 * 60 * 24) {
+    		$("#resolutionMinute").attr("disabled", "disabled");
+    		if ($("#chooseResolution").val() === "MINUTE") {
+    			$("#resolutionDay").attr("selected", "selected");
+    		} 
+    	}
+    	else {
+    		$("#resolutionMinute").removeAttr("disabled");
+    	}
+    }
+    
     function loadData() {
-    	// which tab is active -> 
-    	// 		CONFIG: 
-    	// 			- choose URL
-    	// 			- ids: groupByNodes, 
-    	//     	
     	var conf = getCurrentLoadConfig();
     	
 		$("#loadDataButton").hide();
@@ -357,8 +403,9 @@
     	
 		var resolution = $("#chooseResolution").val();
 		var groupByNodes = $(conf.checkedByNodesId).attr("checked") ? '1' : '0';
-		var fromDate = Date.parse($("#timestamp1").val().replace(" ", "T"));
-		var toDate = Date.parse($("#timestamp2").val().replace(" ", "T")); 
+		
+		var fromDate = dateToMillis($("#timestamp1").val());
+		var toDate = dateToMillis($("#timestamp2").val());	
 		
 		//FIXME: 
 		dateError(fromDate);
@@ -368,7 +415,7 @@
 			type : "GET",
 			url : conf.url + "?from=" + fromDate + "&to=" + toDate + "&res=" + resolution + "&byNode=" + groupByNodes,
 			success : function(data) {
-				loadedData = data;
+				conf.loadedData = data;
 				$("#loadingButton").hide();
 				$("#loadDataButton").show();
 				render();
@@ -380,36 +427,6 @@
 			}
 		});
     }
-    
-//     function loadData_ORG() {
-// 		$("#loadDataButton").hide();
-// 		$("#loadingButton").show();
-		
-// 		var resolution = $("#chooseResolution").val();
-// 		var groupByNodes = $("#groupByNodes").attr("checked") ? '1' : '0';
-// 		var fromDate = Date.parse($("#timestamp1").val().replace(" ", "T"));
-// 		var toDate = Date.parse($("#timestamp2").val().replace(" ", "T")); 
-		
-		FIXME: 
-// 		dateError(fromDate);
-// 		dateError(toDate);
-		
-// 		$.ajax({
-// 			type : "GET",
-// 			url : "/admin/reporting/ajax/stats?from=" + fromDate + "&to=" + toDate + "&res=" + resolution + "&byNode=" + groupByNodes,
-// 			success : function(data) {
-// 				loadedData = data;
-// 				$("#loadingButton").hide();
-// 				$("#loadDataButton").show();
-// 				render();
-// 			},
-// 			complete: function() {
-// 				$("#loadingButton").hide();
-// 				$("#loadDataButton").show();
-				
-// 			}
-// 		});
-//     }
     
     function dateError(value, id) {
     	if (! defined(value) || isNaN(value)) {
@@ -458,65 +475,87 @@
 			type : "GET",
 			url : "/admin/reporting/ajax/nodes",
 			success : function(data) {
+				$("#chooseNodesSpinner").hide();
+				$("#chooseNodesSpinnerByRequestMethod").hide();
+				$("#chooseNodesSpinnerByExceptionType").hide();
+				
 				for ( var i = 0; i < data.length; i++) {
 					var content = '<option value="' + data[i] + '">' + data[i] + '</option>';
-					
-					$("#chooseNodesSpinner").hide();
-					$("#chooseNodesSpinnerByRequestMethod").hide();
-					$("#chooseNodesSpinnerByExceptionType").hide();
-					
 					$('#chooseNodes').append(content);
 					$('#chooseNodesByRequestMethod').append(content);
 					$('#chooseNodesByExceptionType').append(content);
 					
-					$("#chooseNodes").show();
-					$("#chooseNodesByRequestMethod").show();
-					$("#chooseNodesByExceptionType").show();
 				}
+				$("#chooseNodes").show();
+				$("#chooseNodesByRequestMethod").show();
+				$("#chooseNodesByExceptionType").show();
 			}
 		});
+	}
+	
+	function initialHide() {
+		_.each([
+		        "#tab2_content",
+		        "#tab3_content",
+		        "#loadingButton",
+		        "#nodeBlock",
+		        "#nodeBlockByRequestMethod",
+		        "#nodeBlockByExceptionType",
+		        "#chooseRequestMethod",
+		        "#chooseExceptionType"
+		        ], function(id) { $(id).hide(); });
+	}
+	
+	function initialRegisterChange() {
+		_.each([
+				"#choose",
+				"#chooseByRequestMethod",
+				"#chooseByExceptionType",
+				"#chooseRequestMethod",
+				"#chooseExceptionType",
+				"#chooseNodes",
+				"#chooseNodesByRequestMethod",
+				"#chooseNodesByExceptionType"
+		        ], 
+		        function(id) { $(id).change(render); });
+	}
+	
+	function initialRegisterTabClick() {
+		for ( var i = 1; i <= 3; i++) {
+			$("#tab" +i).click((function(j) {
+				return function() {
+					handleTabClick(j);
+				}
+			})(i));
+		}
+	}
+	
+	function initialRegisterByNodesCheck() {
+		$("#groupByNodes").change(function() {
+			loadData();
+			displayNodesTab1();
+		});
+		
+		$("#groupByNodesByRequestMethod").change(function() {
+			loadData();
+			displayNodesTab2();
+		});
+		
+		$("#groupByNodesByExceptionType").change(function() {
+			loadData();
+			displayNodesTab3();
+		});		
 	}
 
 	$(document).ready(
 			function() {
 				
-				// register tab clicks
-				for ( var i = 1; i <= 3; i++) {
-					$("#tab" +i).click((function(j) {
-						return function() {
-							handleTabClick(j);
-						}
-					})(i));
-				}
-				
-				$("#tab2_content").hide();
-				$("#tab3_content").hide();
-				$("#loadingButton").hide();
-				$("#nodeBlock").hide();
-				$("#nodeBlockByRequestMethod").hide();
-				$("#nodeBlockByExceptionType").hide();
-				$("#chooseRequestMethod").hide();
-				
-				$("#choose").change(function() {
-					render();
-				});
-				$("#chooseNodes").change(function() {
-					render();
-				});
-				
-				$("#groupByNodes").change(function() {
-					loadData();
-					displayNodesTab1();
-				});
-				
-				$("#groupByNodesByRequestMethod").change(function() {
-					displayNodesTab2();
-				});
-				
-				$("#groupByNodesByExceptionType").change(function() {
-					displayNodesTab3();
-				});				
-
+				initialRegisterTabClick();
+				initialHide();
+				initialRegisterChange();
+				initialRegisterByNodesCheck();
+		
+				// add flot stuff 
 				$.plot($("#placeholder"), createPlotData(), PLOT_CONFIG);
 
 				var previousPoint = null;
