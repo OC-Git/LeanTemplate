@@ -16,7 +16,6 @@ object ApplicationBuild extends Build {
         "org.apache.commons" % "commons-email" % "1.1",
         "funcy" % "funcy_2.9.1" % "0.1" % "test",
         "org.jsoup" % "jsoup" % "1.6.2" % "test", 
-        "net.sf.opencsv" % "opencsv" % "2.3",
         
         // modules
         "leantemplate.commons" % "leantemplate.commons_2.9.1" % "1.0-SNAPSHOT",

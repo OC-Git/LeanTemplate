@@ -13,7 +13,7 @@ public abstract class AbstractSecured extends Security.Authenticator {
 	}
 	
 	/**
-	 * implements remebering the original request path for later redirection after successful authentication
+	 * implements remembering the original request path for later redirection after successful authentication
 	 * @return returns always null. 
 	 * {@inheritDoc}
 	 */

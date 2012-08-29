@@ -8,7 +8,8 @@ object ApplicationBuild extends Build {
     val appVersion      = "1.0-SNAPSHOT"
 
     val appDependencies = Seq(
-      "commons-io" % "commons-io" % "2.3"
+      "commons-io" % "commons-io" % "2.3",
+       "net.sf.opencsv" % "opencsv" % "2.3"
     )
 
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(

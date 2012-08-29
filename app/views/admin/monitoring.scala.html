@@ -1,10 +1,11 @@
 @(initStartDate: String, initEndDate : String) 
 
-@import views.html.helper._ 
+@import views.html.helper._
 
+ 
 @loggedin_main() {
-
 <script src="/assets/javascripts/jquery.flot.js"></script>
+<script src="/assets/javascripts/jquery.dataTables.min.js"></script>
 
 <div class="span10">
 	<div class="row-fluid">
@@ -19,13 +20,13 @@
 
 		<ul class="nav nav-tabs">
 			<li id="tab1" class="active">
-				<a href="#">Monitor</a>
+				<a>Monitor</a>
 			</li>
 			<li id="tab2">
-				<a href="#">Nach Request-Methode</a>
+				<a>Nach Request-Methode</a>
 			</li>
 			<li id="tab3">
-				<a href="#">Nach Exception-Typ</a>
+				<a>Nach Exception-Typ</a>
 			</li>
 		</ul>
 
@@ -49,12 +50,12 @@
 					</select>
 				</div>
 				<div class="span9">
-					<span id="nodeBlock">
+					<span id="nodeBlock" style="display: none;">
 						<label>Node</label>
 						<span id="chooseNodesSpinner">
 							<img alt="loading" src="/assets/images/spinner.gif"/>
 						</span>
-						<select id="chooseNodes" multiple="multiple" >
+						<select id="chooseNodes" multiple="multiple" style="display: none;">
 						</select>
 					</span>				
 				</div>
@@ -64,7 +65,7 @@
 			<input id="groupByNodes" type="checkbox" />
 		</span>
 		
-		<span id="tab2_content">
+		<span id="tab2_content" style="display: none;">
 			<div class="row-fluid">
 				<div class="span3">
 					<label>Wert</label> 
@@ -79,17 +80,17 @@
 						<span id="chooseRequestMethodSpinner">
 							<img alt="loading" src="/assets/images/spinner.gif"/>
 						</span>
-						<select id="chooseRequestMethod" multiple="multiple" >
+						<select id="chooseRequestMethod" multiple="multiple" style="display: none;">
 						</select>
 					</span>	
 				</div>
 				<div class="span3">
-					<span id="nodeBlockByRequestMethod">
+					<span id="nodeBlockByRequestMethod" style="display: none;">
 						<label>Node</label>
 						<span id="chooseNodesSpinnerByRequestMethod">
 							<img alt="loading" src="/assets/images/spinner.gif"/>
 						</span>
-						<select id="chooseNodesByRequestMethod" multiple="multiple" >
+						<select id="chooseNodesByRequestMethod" multiple="multiple" style="display: none;">
 						</select>
 					</span>				
 				</div>
@@ -99,7 +100,7 @@
 			<input id="groupByNodesByRequestMethod" type="checkbox" />
 		</span>
 		
-		<span id="tab3_content">
+		<span id="tab3_content" style="display: none;">
 			<div class="row-fluid">
 				<div class="span3">
 					<label>Wert</label> 
@@ -113,17 +114,17 @@
 						<span id="chooseExceptionTypeSpinner">
 							<img alt="loading" src="/assets/images/spinner.gif"/>
 						</span>
-						<select id="chooseExceptionType" multiple="multiple" >
+						<select id="chooseExceptionType" multiple="multiple" style="display: none;" >
 						</select>
 					</span>	
 				</div>
 				<div class="span3">
-					<span id="nodeBlockByExceptionType">
+					<span id="nodeBlockByExceptionType" style="display: none;">
 						<label>Node</label>
 						<span id="chooseNodesSpinnerByExceptionType">
 							<img alt="loading" src="/assets/images/spinner.gif"/>
 						</span>
-						<select id="chooseNodesByExceptionType" multiple="multiple" >
+						<select id="chooseNodesByExceptionType" multiple="multiple" style="display: none;">
 						</select>
 					</span>				
 				</div>
@@ -162,7 +163,7 @@
 		<div class="form-actions">
 			<div class="row-fluid">
 				<div class="span6">
-					<img id="loadingButton" src="/assets/images/spinner.gif"/>
+					<img id="loadingButton" src="/assets/images/spinner.gif" style="display: none;"/>
 					<input class="btn btn-primary" type="button" id="loadDataButton" value="Daten aktualisieren" />
 				</div>				
 				<div class="span6 pagination-right">	
@@ -204,15 +205,35 @@
 			
 		</script>
 		<!-- END-OF-TIMESTAMP -->
-		<div id="placeholder" style="width: 100%; height: 300px">
-		</div>
+		
+		<ul id="bottomTabs" class="nav nav-tabs">
+			<li id="bottomTab1" class="active">
+				<a>Graphisch</a>
+			</li>
+			<li id="bottomTab2">
+				<a>Tabellarisch</a>
+			</li>
+		</ul>		
+		
+		<span id="bottomTab1_content">
+			<div id="placeholder" style="width: 100%; height: 300px">
+			</div>
+		</span>
+		
+		<span id="bottomTab2_content" style="display: none">
+			<div id="tableDiv" style="width: 100%; height: 300px">
+			</div>
+		</span>		
+		
 	</div>
 </div>
 <!--/span-->
-
 }
-
 <script>
+
+	var globalDatatable;
+	var tableData; 
+
 	var PLOT_CONFIG = {
 			xaxis: {
 				mode: 'time',
@@ -240,7 +261,7 @@
 		tab2 : {
 			url: "/admin/reporting/ajax/statsByRequest",
 			checkedByNodesId : "#groupByNodesByRequestMethod",
-			selectCriteriaId: "#chooseByRequestMethod",
+			selectCriteriaId : "#chooseByRequestMethod",
 			selectNodeId     : "#chooseNodesByRequestMethod",
 			filterIds : [
 			             { 
@@ -265,19 +286,16 @@
 		}
 	};
 	
-	function createPlotData() {
-		var conf = getCurrentLoadConfig();
-		if (conf == null | ! defined(conf.loadedData)) return [ [ [], [] ] ];	
+	function buildFilteredData(conf) {
+		if (conf == null | ! defined(conf.loadedData)) return null; // [ [ [], [] ] ];	
 		
 		// make private copy of config
 		var copyFilterIds = conf.filterIds.slice();
-		var criteriaValueList = $(conf.selectCriteriaId).val(); 
 		
 		// use nodes as criteria ? 
-		var groupByNodes = $(conf.checkedByNodesId).attr("checked");
+		var groupByNodes = isFilterByNodes(conf);
 		if (groupByNodes) copyFilterIds.push({ id: conf.selectNodeId, jsonName: "nodeId" });
 		
-		var outerArr = [];
 		var labels = []; 
 		var hash = {};
 		
@@ -292,11 +310,13 @@
 					if (filterValue === data[filterIdConf.jsonName]) {
 						matches++;
 						labels[filterGroupIndex] = filterValue;
-						// FIXME: continue to next filterGroup
 					}
 				});
 			});
-			if (matches === copyFilterIds.length) {
+			
+			var isMatching = matches === copyFilterIds.length;
+			
+			if (isMatching) {
 				var key = labels.join(" ");
 				var arr = hash[key];
 				if (! defined(arr)) {
@@ -307,6 +327,19 @@
 			}
 		}); // data
 			
+		return hash; 
+	}
+	
+	function createPlotData(hash) {
+		var defaultReturn = [ [ [], [] ] ];
+		var conf = getCurrentLoadConfig();
+		if (conf == null | ! defined(conf.loadedData)) return defaultReturn;	
+		
+		var criteriaValueList = $(conf.selectCriteriaId).val(); 
+		if (criteriaValueList === null || criteriaValueList.length === 0) return defaultReturn;		
+		
+		var outerArr = [];
+		
 		_.each(criteriaValueList, function(criteria) {
 			for (key in hash) {
 				var seqArr = [];
@@ -325,16 +358,109 @@
 		return outerArr; 
 	}
 	
-	function defined(value) {
-		if (value == null) return false;
-		if (typeof value === 'undefined') return false; 
-		return true;
+	function getHtmlForTable(headerArray) {
+		if (! defined(headerArray)) return;
+		
+		var v = '<table id="dataTable" class="table table-hover"><thead style="background-color: #F5F5F5; "><tr>';
+		for (var i = 0; i< headerArray.length; i++) {
+			v += "<th>" + headerArray[i] + "</th>";
+		}
+		v += '</tr></thead></table>';
+		return v; 
 	}
 	
-	function render() {
+	function renderDatatable(conf, dataProviderCallback) {
+		var visibleTab = getVisibleTabForFlotOrTable();
+		if (! defined(visibleTab) || ! (visibleTab === "bottomTab2")) return;
+		
+		if (defined(globalDatatable)) {
+			globalDatatable.fnDestroy(true);
+		}
+		
+		$("#tableDiv").html(getHtmlForTable(getHeaderArrayForDataTable(conf)));
+	
+		globalDatatable = $("#dataTable").dataTable( {
+			"aaData": dataProviderCallback(),
+			"bPaginate" : true, 
+			"bProcessing" : true,
+			"sPaginationType": "full_numbers"
+		});
+	}
+	
+	function getHeaderArrayForDataTable(conf) {
+		var list = _.union(
+				["timestamp"], 
+				$(conf.selectCriteriaId).val(), 
+				_.map(conf.filterIds, function(filterNode) {
+					return filterNode.jsonName;
+				})
+		);
+		
+		if (isFilterByNodes(conf)) list.push("nodeId");
+		return list;
+	}
+	
+	function isFilterByNodes(conf) {
+		return $(conf.checkedByNodesId).attr("checked");;
+	}
+	
+	// _.keys() behaves different in this case for empty keys
+	function countHashKeys(hash) {
+		var count = 0; 
+		for (var key in hash) {
+			count++;
+		}
+		return count;
+	}
+	
+	function renderFlotAndTable() {
 		var conf = getCurrentLoadConfig();
 		if (conf.loadedData == null) loadData();
-		$.plot($("#placeholder"), createPlotData(), PLOT_CONFIG);
+		
+		var hash = buildFilteredData(conf);
+		var isDataComplete = hash != null && countHashKeys(hash) !== 0;
+
+		var visibleTab = getVisibleTabForFlotOrTable();
+		if (! defined(visibleTab)) return; 
+		
+		if (visibleTab === "bottomTab1" && isDataComplete) {
+			$.plot($("#placeholder"), createPlotData(hash), PLOT_CONFIG);
+			return;
+		}
+		
+		if (isDataComplete) {
+			var criteriaValueList = $(conf.selectCriteriaId).val();
+			if (criteriaValueList === null || criteriaValueList.length === 0) return; 
+			
+			renderDatatable(conf, function() {
+				var tableRows = [];
+				var byNodes = isFilterByNodes(conf);
+				
+				for (key in hash) {
+					var dataList = hash[key];
+					
+					_.each(dataList, function(data) {
+						var seqArr = [];
+						seqArr.push(formatDate(new Date(data["timestampMillis"])));
+					
+						_.each(criteriaValueList, function(selectedCrit) {
+							seqArr.push(data[selectedCrit]);
+						});
+						
+						_.each(conf.filterIds, function(filterNode) {
+							seqArr.push(data[filterNode.jsonName]);
+						});
+						
+						if (byNodes) {
+							seqArr.push(data["nodeId"]);
+						}
+						
+						tableRows.push(seqArr);
+					});
+				}
+				return tableRows; 
+			});
+		}
 	}
 	
     function showTooltip(x, y, contents) {
@@ -353,7 +479,13 @@
 	function pad(val) {
 		if (val.toString().length === 1) return "0" + val; 
 		return val;
-	}    
+	}   
+	
+	function defined(value) {
+		if (value == null) return false;
+		if (typeof value === 'undefined') return false; 
+		return true;
+	}	
     
     function formatDate(date) {
     	return date.getUTCDate() + "." + (date.getUTCMonth() +1 )+ "." + date.getUTCFullYear() + " " 
@@ -382,6 +514,12 @@
 
     function displayNodesTab3() {
     	displayNodesSelection("nodeBlockByExceptionType", "groupByNodesByExceptionType");
+    }
+    
+    function getVisibleTabForFlotOrTable() {
+    	var activeTab = $("#bottomTabs").children("li.active").attr("id");
+    	if (!defined(activeTab)) return null;
+    	return activeTab;
     }
     
     function getCurrentLoadConfig() {
@@ -419,7 +557,7 @@
 					conf.loadedData = data;
 					$("#loadingButton").hide();
 					$("#loadDataButton").show();
-					render();
+					renderFlotAndTable();
 				},
 				complete: function() {
 					$("#loadingButton").hide();
@@ -446,7 +584,7 @@
     	var conf = getCurrentLoadConfig();
     	
 		var resolution = $("#chooseResolution").val();
-		var groupByNodes = $(conf.checkedByNodesId).attr("checked") ? '1' : '0';
+		var groupByNodes = isFilterByNodes(conf) ? '1' : '0';
 		
 		var fromDate = dateToMillis($("#timestamp1").val());
 		var toDate = dateToMillis($("#timestamp2").val());	
@@ -464,19 +602,20 @@
 //     		$("#" + id).animate( {
 //     		});
 			alert("ungültiges Datum=" + value);
+			return true;
     	}
     }
     
 
-	function handleTabClick(tabNr) {
-		$("#tab" + tabNr).attr("class", "active");
+	function handleTabClick(idPrefix, tabNr) {
+		$(idPrefix + tabNr).attr("class", "active");
 		for ( var i = 1; i <= 3; i++) {
 			if (i !== tabNr) {
-				$("#tab" +i).removeAttr("class");
-				$("#tab" +i + "_content").hide();
+				$(idPrefix +i).removeAttr("class");
+				$(idPrefix +i + "_content").hide();
 			}
 		}
-		$("#tab" + tabNr +"_content").fadeIn();
+		$(idPrefix + tabNr +"_content").fadeIn();
 	}
 	
 	function loadTab2RequestMethods() {
@@ -524,22 +663,6 @@
 		});
 	}
 	
-	function initialHide() {
-		_.each([
-		        "#tab2_content",
-		        "#tab3_content",
-		        "#loadingButton",
-		        "#nodeBlock",
-		        "#nodeBlockByRequestMethod",
-		        "#nodeBlockByExceptionType",
-		        "#chooseRequestMethod",
-		        "#chooseExceptionType",
-		        "#chooseNodes",
-		        "#chooseNodesByRequestMethod",
-		        "#chooseNodesByExceptionType"
-		        ], function(id) { $(id).hide(); });
-	}
-	
 	function initialRegisterChange() {
 		_.each([
 				"#choose",
@@ -551,14 +674,14 @@
 				"#chooseNodesByRequestMethod",
 				"#chooseNodesByExceptionType"
 		        ], 
-		        function(id) { $(id).change(render); });
+		        function(id) { $(id).change(renderFlotAndTable); });
 	}
 	
-	function initialRegisterTabClick() {
-		for ( var i = 1; i <= 3; i++) {
-			$("#tab" +i).click((function(j) {
+	function initialRegisterTabClick(idPrefix, tabSize, callbackClick) {
+		for ( var i = 1; i <= tabSize; i++) {
+			$(idPrefix + i ).click((function(j) {
 				return function() {
-					handleTabClick(j);
+					callbackClick(idPrefix, j);
 				}
 			})(i));
 		}
@@ -584,8 +707,13 @@
 	$(document).ready(
 			function() {
 				
-				initialRegisterTabClick();
-				initialHide();
+				initialRegisterTabClick("#tab", 3, handleTabClick);
+				initialRegisterTabClick("#bottomTab", 2, 
+						function(idPrefix, tabNr) {
+							handleTabClick(idPrefix, tabNr);
+							renderFlotAndTable();
+						});
+				
 				initialRegisterChange();
 				initialRegisterByNodesCheck();
 		
@@ -619,6 +747,6 @@
 				$("#loadDataButton").click(loadData);
 				$("#exportCsv").click(exportCsv);
 				
-
+				
 			});
 </script>
