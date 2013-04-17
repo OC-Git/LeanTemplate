@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import models.MvTestFeature;
 import models.MvTestVariant;
 import play.libs.Akka;
-import akka.util.Duration;
+import scala.concurrent.duration.Duration;
 
 /**
  * see https://docs.google.com/document/d/1vCSSA3piVk_mrvpROOL9f3BRuVIfMvVz-zZB0NZGI0A/edit#
@@ -56,7 +56,8 @@ public class MvTest {
 		    public void run() {
 		    	updateFeatures();
 		    }
-		  }
+		  },
+	          Akka.system().dispatcher()
 		);		
 	}
 	

@@ -1,17 +1,18 @@
 import sbt._
 import Keys._
-import PlayProject._
+import play.Project._
 
 object ApplicationBuild extends Build {
 
-    val appName         = "leantemplate.search"
+    val appName         = "leantemplate_search"
     val appVersion      = "1.0-SNAPSHOT"
 
     val appDependencies = Seq(
-      "org.apache.lucene" % "lucene-core" % "3.6.0"
+        javaCore, javaJdbc, javaEbean, 
+        "org.apache.lucene" % "lucene-core" % "3.6.0"
     )
 
-    val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
+    val main = play.Project(appName, appVersion, appDependencies).settings(
       // Add your own project settings here      
     )
 

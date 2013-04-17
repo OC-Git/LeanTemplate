@@ -13,7 +13,7 @@ import controllers.forms.LoginForm;
 
 public class DefaultLoginController extends Controller {
 
-	protected static Form<LoginForm> loginForm = form(LoginForm.class);
+	protected static Form<LoginForm> loginForm = Form.form(LoginForm.class);
 
 	public static interface LoginLogicCallback {
 		public Result perform(User loginUser, Form<LoginForm> _form);

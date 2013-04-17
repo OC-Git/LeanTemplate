@@ -1,6 +1,6 @@
 import sbt._
 import Keys._
-import PlayProject._
+import play.Project._
 
 object ApplicationBuild extends Build {
 
@@ -8,6 +8,8 @@ object ApplicationBuild extends Build {
     val appVersion      = "1.0-SNAPSHOT"
 
     val appDependencies = Seq(
+        javaCore, javaJdbc, javaEbean, 
+        
         "postgresql" % "postgresql" % "9.1-901.jdbc4",
         "commons-lang" % "commons-lang" % "2.6",
         "commons-collections" % "commons-collections" % "3.2.1",
@@ -16,14 +18,15 @@ object ApplicationBuild extends Build {
         "org.apache.commons" % "commons-email" % "1.1",
         "funcy" % "funcy_2.9.1" % "0.1" % "test",
         "org.jsoup" % "jsoup" % "1.6.2" % "test", 
+        "net.sf.opencsv" % "opencsv" % "2.1",
         
         // modules
-        "leantemplate.commons" % "leantemplate.commons_2.9.1" % "1.0-SNAPSHOT",
-        "leantemplate.search" % "leantemplate.search_2.9.1" % "1.0-SNAPSHOT",
-        "leantemplate.crud" % "leantemplate.crud_2.9.1" % "1.0-SNAPSHOT",
-        "leantemplate.crud-view" % "leantemplate.crud-view_2.9.1" % "1.0-SNAPSHOT",
-        "leantemplate.abtest" % "leantemplate.abtest_2.9.1" % "1.0-SNAPSHOT",
-        "leantemplate.monitoring" % "leantemplate.monitoring_2.9.1" % "1.0-SNAPSHOT"
+        "leantemplate_commons" % "leantemplate_commons_2.10" % "1.0-SNAPSHOT",
+        "leantemplate_search" % "leantemplate_search_2.10" % "1.0-SNAPSHOT",
+        "leantemplate_crud" % "leantemplate_crud_2.10" % "1.0-SNAPSHOT",
+        "leantemplate_crud-view" % "leantemplate_crud-view_2.10" % "1.0-SNAPSHOT",
+        "leantemplate_abtest" % "leantemplate_abtest_2.10" % "1.0-SNAPSHOT",
+        "leantemplate_monitoring" % "leantemplate_monitoring_2.10" % "1.0-SNAPSHOT"
     )
 
     // Only compile the bootstrap bootstrap.less file and any other *.less file in the stylesheets directory 
@@ -36,7 +39,7 @@ object ApplicationBuild extends Build {
 	    (base / "app" / "assets" / "site" / "stylesheets" * "*.less")
 	)
 	
-	val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
+	val main = play.Project(appName, appVersion, appDependencies).settings(
 	  // Add your own project settings here
 	    lessEntryPoints <<= baseDirectory(customLessEntryPoints),
 	    resolvers += Resolver.url("Sebastian Baltes Repository", url("http://sebastianbaltesobjectcode.github.com/releases/"))(Resolver.ivyStylePatterns),

@@ -1,17 +1,18 @@
 import sbt._
 import Keys._
-import PlayProject._
+import play.Project._
 
 object ApplicationBuild extends Build {
 
-    val appName         = "leantemplate.abtest"
+    val appName         = "leantemplate_abtest"
     val appVersion      = "1.0-SNAPSHOT"
 
     val appDependencies = Seq(
-      "leantemplate.crud" % "leantemplate.crud_2.9.1" % "1.0-SNAPSHOT"
+        javaCore, javaJdbc, javaEbean, 
+        "leantemplate_crud" % "leantemplate_crud_2.10" % "1.0-SNAPSHOT"
     )
 
-    val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
+    val main = play.Project(appName, appVersion, appDependencies).settings(
       // Add your own project settings here      
     )
 

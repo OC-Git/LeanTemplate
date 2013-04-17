@@ -2,7 +2,7 @@
 
 @import views.html.helper._ 
 
-@hasImage() = @{ !org.apache.commons.lang.StringUtils.isEmpty(field("id").value.getOrElse(null)) }
+@hasImage() = @{ !org.apache.commons.lang3.StringUtils.isEmpty(field("id").value.getOrElse(null)) }
 
 @input(field, args:_*) { (id, name, value, htmlArgs) =>
     @** only the @{id}.id changes the model! **@

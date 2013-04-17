@@ -25,7 +25,7 @@ import controllers.forms.RegistrationForm;
 
 public class RegistrationController extends Controller {
 
-	private static Form<RegistrationForm> registrationForm = form(RegistrationForm.class);
+	private static Form<RegistrationForm> registrationForm = Form.form(RegistrationForm.class);
 
 	public static Result index() {
 		return ok(views.html.site.registration.render(registrationForm));

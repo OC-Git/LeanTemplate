@@ -14,8 +14,8 @@ import controllers.forms.PasswordChangeForm;
 @Security.Authenticated(SiteSecured.class)
 public class UserProfileController extends Controller {
 
-	private static final Form<PasswordChangeForm> passwordChangeForm = form(PasswordChangeForm.class);
-	private static final Form<OptionalUserProfileForm> optionalUserProfileForm = form(OptionalUserProfileForm.class);
+	private static final Form<PasswordChangeForm> passwordChangeForm = Form.form(PasswordChangeForm.class);
+	private static final Form<OptionalUserProfileForm> optionalUserProfileForm = Form.form(OptionalUserProfileForm.class);
 
 	public static Result index() {
 		final User authUser = Authenticated.getAuthenticatedUser();

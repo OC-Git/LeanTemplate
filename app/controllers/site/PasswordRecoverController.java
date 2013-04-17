@@ -28,8 +28,8 @@ import controllers.forms.PasswordChangeForm;
  */
 public class PasswordRecoverController extends Controller {
 
-	private static Form<EMailForm> emailForm = form(EMailForm.class);
-	private static Form<PasswordChangeForm> passwordChangeForm = form(PasswordChangeForm.class);
+	private static Form<EMailForm> emailForm = Form.form(EMailForm.class);
+	private static Form<PasswordChangeForm> passwordChangeForm = Form.form(PasswordChangeForm.class);
 
 	public static Result indexDefault() {
 		return ok(views.html.site.pwrecover.render(emailForm));

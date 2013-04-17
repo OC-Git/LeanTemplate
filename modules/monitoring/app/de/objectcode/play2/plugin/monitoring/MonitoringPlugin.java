@@ -7,7 +7,7 @@ import play.Configuration;
 import play.Logger;
 import play.Plugin;
 import play.libs.Akka;
-import akka.util.Duration;
+import scala.concurrent.duration.Duration;
 import de.objectcode.play2.plugin.monitoring.infoadapter.DbInfoAdapter;
 import de.objectcode.play2.plugin.monitoring.infoadapter.GcInfoAdapter;
 import de.objectcode.play2.plugin.monitoring.infoadapter.HeapMemoryInfoAdapter;
@@ -109,12 +109,12 @@ public class MonitoringPlugin extends Plugin {
 		Akka.system()
 				.scheduler()
 				.schedule(Duration.create(aggregateJobMillis, TimeUnit.MILLISECONDS),
-						Duration.create(aggregateJobMillis, TimeUnit.MILLISECONDS), Aggregator.get());
+						Duration.create(aggregateJobMillis, TimeUnit.MILLISECONDS), Aggregator.get(), Akka.system().dispatcher());
 
 		Akka.system()
 				.scheduler()
 				.schedule(Duration.create(0, TimeUnit.MILLISECONDS), Duration.create(1, TimeUnit.MINUTES),
-						loadAverageAggregator);
+						loadAverageAggregator, Akka.system().dispatcher());
 	}
 
 }

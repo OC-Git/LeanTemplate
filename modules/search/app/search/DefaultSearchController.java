@@ -24,7 +24,7 @@ import de.objectcode.play2.plugin.search.SearchPlugin;
 
 public class DefaultSearchController extends Controller {
 
-	protected static Form<SearchForm> form = form(SearchForm.class);
+	protected static Form<SearchForm> form = Form.form(SearchForm.class);
 	protected static final Integer DEFAULT_MAX_ROWS = 25;
 	
 	/**

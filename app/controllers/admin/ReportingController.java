@@ -21,7 +21,7 @@ import authenticate.admin.AdminSecured;
 @Security.Authenticated(AdminSecured.class)
 public class ReportingController extends Controller {
 
-	private static final Form<ReportQuery> form = form(ReportQuery.class);
+	private static final Form<ReportQuery> form = Form.form(ReportQuery.class);
 
 	public static Result index() {
 		return ok(views.html.admin.createReports.render(null, form));

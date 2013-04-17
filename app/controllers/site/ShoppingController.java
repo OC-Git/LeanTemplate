@@ -19,7 +19,7 @@ public class ShoppingController extends Controller {
 		public long id;
 	}
 	
-	private static Form<ShoppingCartAdd> shoppingCartAddForm = form(ShoppingCartAdd.class);
+	private static Form<ShoppingCartAdd> shoppingCartAddForm = Form.form(ShoppingCartAdd.class);
 	
 	@Security.Authenticated(SiteSecured.class)
 	public static Result addToShoppingCart() {

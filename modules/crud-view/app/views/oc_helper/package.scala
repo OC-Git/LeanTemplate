@@ -1,4 +1,4 @@
-package views.html;
+package views.html
 
 import play.api.Logger
 import play.api.templates._
@@ -8,11 +8,11 @@ import controllers._
 import java.lang.Boolean
 import scala.xml._
 import views.html.helper._
-import models.CrudModel
 import play.data.format.Formatters
 import global.Html5DateFormatter
 import global.TimeStampFormatter
-import org.apache.commons.lang.StringUtils
+import org.apache.commons.lang3.StringUtils
+import models.CrudModel
 
 /**
  * Contains template helpers, for example for generating HTML forms.
@@ -85,7 +85,7 @@ package object oc_helper {
   }
 
   def header(key: String, title: String)(implicit clist: CrudListState): Html = {
-    new Html("<th class='" + sortByCss(key) + "'> <a href='" + link(0, key) + "'>" + title + "</a> </th>")
+    new Html(new StringBuilder("<th class='" + sortByCss(key) + "'> <a href='" + link(0, key) + "'>" + title + "</a> </th>"))
   }
 
   def asBoolean(field: Field): Boolean = {
@@ -96,9 +96,13 @@ package object oc_helper {
     field.value.getOrElse(null).toLong
   }
 
-  def addAttributes(element: Elem, attributes: Map[Symbol, _ <: Any]): Elem = {
+  def addAttributes(element: Elem, attributes: Map[Symbol, Any]): Elem = {
     var el = element
-    for ((key, value) <- attributes) el = el % Attribute(None, key.name, Text(value.toString), Null)
+    for (a <- attributes) {
+      val name = a._1.name
+      val text = Text(a._2.toString)
+      el = el % Attribute(None, name, text, Null)
+    }
     el
   }
 
@@ -145,8 +149,7 @@ package object oc_helper {
                     {
                       options.map { v =>
                         val value = optionValue(v)
-                        val z: Option[String] = if (values contains value) Some("selected") else None
-                        <option value={ value } selected={ z map Text }>{ optionText(v) }</option>
+                        <option value={ value } selected={ if (values contains value) Option(Text("selected")) else null }>{ optionText(v) }</option>
                       }
                     }
                   </select>,
