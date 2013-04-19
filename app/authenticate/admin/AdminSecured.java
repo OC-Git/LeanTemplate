@@ -2,11 +2,11 @@ package authenticate.admin;
 
 import models.Role;
 import models.User;
-import controllers.admin.routes;
-import play.mvc.Result;
 import play.mvc.Http.Context;
+import play.mvc.Result;
 import authenticate.AbstractSecured;
 import authenticate.Authenticated;
+import controllers.admin.routes;
 
 public class AdminSecured extends AbstractSecured {
 

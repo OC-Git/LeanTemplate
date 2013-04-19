@@ -3,14 +3,13 @@ package controllers.admin;
 import static controllers.forms.FlashScope.WARN;
 import models.Role;
 import models.User;
-
+import play.Logger;
+import play.api.templates.Html;
+import play.data.Form;
+import play.mvc.Result;
 import controllers.DefaultLoginController;
 import controllers.forms.FlashScope;
 import controllers.forms.LoginForm;
-import play.Logger;
-import play.mvc.Result;
-import play.api.templates.Html;
-import play.data.Form;
 
 public class LoginController extends DefaultLoginController {
 

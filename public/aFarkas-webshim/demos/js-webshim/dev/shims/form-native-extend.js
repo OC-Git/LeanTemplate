@@ -1,4 +1,4 @@
-jQuery.webshims.register('form-extend', function($, webshims, window, doc, undefined, options){
+jQuery.webshims.register('form-native-extend', function($, webshims, window, doc, undefined, options){
 	"use strict";
 	var Modernizr = window.Modernizr;
 	var modernizrInputTypes = Modernizr.inputtypes;
@@ -6,15 +6,32 @@ jQuery.webshims.register('form-extend', function($, webshims, window, doc, undef
 	var typeModels = webshims.inputTypes;
 	var validityRules = {};
 	
+	var updateValidity = (function(){
+		var timer;
+		var getValidity = function(){
+			$(this).prop('validity');
+		};
+		var update = function(){
+			$('input').each(getValidity);
+		};
+		return function(fast){
+			clearTimeout(timer);
+			timer = setTimeout(update, 9);
+		};
+	})();
 	webshims.addInputType = function(type, obj){
 		typeModels[type] = obj;
+		//update validity of all implemented input types
+		if($.isDOMReady && Modernizr.formvalidation && !webshims.bugs.bustedValidity){
+			updateValidity();
+		}
 	};
 	
 	webshims.addValidityRule = function(type, fn){
 		validityRules[type] = fn;
 	};
 	
-	webshims.addValidityRule('typeMismatch',function (input, val, cache, validityState){
+	webshims.addValidityRule('typeMismatch', function (input, val, cache, validityState){
 		if(val === ''){return false;}
 		var ret = validityState.typeMismatch;
 		if(!('type' in cache)){
@@ -253,23 +270,4 @@ jQuery.webshims.register('form-extend', function($, webshims, window, doc, undef
 	});
 	
 	
-	//options only return options, if option-elements are rooted: but this makes this part of HTML5 less backwards compatible
-	if(Modernizr.input.list && !($('<datalist><select><option></option></select></datalist>').prop('options') || []).length ){
-		webshims.defineNodeNameProperty('datalist', 'options', {
-			prop: {
-				writeable: false,
-				get: function(){
-					var options = this.options || [];
-					if(!options.length){
-						var elem = this;
-						var select = $('select', elem);
-						if(select[0] && select[0].options && select[0].options.length){
-							options = select[0].options;
-						}
-					}
-					return options;
-				}
-			}
-		});
-	}
 });

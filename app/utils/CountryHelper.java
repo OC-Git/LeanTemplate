@@ -5,7 +5,7 @@ import java.util.List;
 
 
 public class CountryHelper {
-	public static final List<String> countryList = new ArrayList();
+	public static final List<String> countryList = new ArrayList<>();
 	static {
 		countryList.add("Deutschland");
 		countryList.add("Frankreich");

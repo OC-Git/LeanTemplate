@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 
 import models.CrudFinder;
 import models.CrudModel;
+import play.Play;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.Controller;
@@ -64,7 +65,7 @@ public class DynamicCRUDController<T extends CrudModel<T>> extends AbstractCRUDC
 		String className = "views.html."+crudBaseUrl.substring(1).replace('/','.')+renderTemplateSuffix;
 		Class<?> viewListClass;
 		try {
-			viewListClass = Class.forName(className);
+			viewListClass = Play.application().classloader().loadClass(className);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}

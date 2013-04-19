@@ -7,6 +7,7 @@ import org.apache.lucene.store.Directory;
 import play.Application;
 import play.Configuration;
 import play.Logger;
+import play.Play;
 import play.Plugin;
 
 /**
@@ -94,8 +95,7 @@ public class SearchPlugin extends Plugin {
 	
 	private <T> T newInstance(final String className, final Class<T> checkInterface) throws InstantiationException,
 			IllegalAccessException, ClassNotFoundException {
-
-		final Class<?> clazz = Class.forName(className);
+		final Class<?> clazz = Play.application().classloader().loadClass(className);
 		if (!checkInterface.isAssignableFrom(clazz)) {
 			Logger.error("Class " + className + " does not implement " + checkInterface.getSimpleName());
 			throw new InstantiationException("Class " + className + " does not implement " + checkInterface.getSimpleName());

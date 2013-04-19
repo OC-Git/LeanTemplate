@@ -1,20 +1,36 @@
 package functional.test;
 
-import static testutil.TestHelper.*;
-import static org.junit.Assert.*;
-import static play.test.Helpers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static play.test.Helpers.GET;
+import static play.test.Helpers.POST;
+import static play.test.Helpers.fakeRequest;
+import static play.test.Helpers.redirectLocation;
+import static play.test.Helpers.routeAndCall;
+import static play.test.Helpers.session;
+import static testutil.TestHelper.assertFlashEmpty;
+import static testutil.TestHelper.assertFlashError;
+import static testutil.TestHelper.assertFlashWarning;
+import static testutil.TestHelper.assertResultBad;
+import static testutil.TestHelper.assertResultRedirect;
+import static testutil.TestHelper.forMap;
 
 import java.util.HashMap;
 
 import models.Role;
 import models.User;
+
 import org.junit.After;
 import org.junit.Test;
-import authenticate.Authenticated;
-import com.avaje.ebean.Ebean;
 
 import play.mvc.Result;
 import play.test.FakeRequest;
+import authenticate.Authenticated;
+
+import com.avaje.ebean.Ebean;
+
 import funcy.FunctionalTest;
 import funcy.Page;
 

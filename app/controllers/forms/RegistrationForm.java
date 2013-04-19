@@ -1,7 +1,9 @@
 package controllers.forms;
 
 import javax.validation.Valid;
+
 import models.User;
+
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 
 public class RegistrationForm {

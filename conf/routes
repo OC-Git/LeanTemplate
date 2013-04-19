@@ -8,7 +8,6 @@
 GET     /	                         									controllers.site.Application.index()
 POST    /	                         									controllers.site.Application.index()
 
-
 # Map static resources from the /public folder to the /assets URL path
 GET		/assets/site/bootstrap/img/*file								controllers.Assets.at(path="/public/site/bootstrap/img", file)
 GET		/assets/site/bootstrap/js/*file									controllers.Assets.at(path="/public/site/bootstrap/js", file)
@@ -55,7 +54,7 @@ POST	/profile/data													controllers.site.UserProfileController.changeData
 # Admin
 #--------------------------------------------------------------------------------------------------------------------------------------------------
 GET     /admin                         									controllers.admin.Application.index()
-GET     /admin/	                   										controllers.admin.Application.index()
+GET     /admin/                        									controllers.admin.Application.index()
 GET     /admin/login													controllers.admin.LoginController.index()
 POST    /admin/login													controllers.admin.LoginController.authenticate()
 GET		/admin/signout													controllers.admin.LoginController.signOut()

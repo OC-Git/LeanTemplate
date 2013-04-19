@@ -3,7 +3,6 @@
 @import controllers.admin.routes
 @import views.html.helper._ 
 @import views.html.oc_helper._ 
-@import views.html.oc_helper.bootstrap2._ 
 
 @main() {
     
@@ -50,12 +49,12 @@
         </div><!--/span-->
     
     	@if(!flash().isEmpty()) {
-          <div class="span10 offset2">
+          <div class="span10">
 	       	@flashmessages()
 	      </div>
     	}
      
-        <div class="span10 offset2">
+        <div class="span10">
        	  @content
         </div>
 		

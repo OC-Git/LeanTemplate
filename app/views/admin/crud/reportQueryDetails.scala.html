@@ -5,8 +5,9 @@
 @import controllers.admin.routes 
 @import views.html.helper._
 @import views.html.oc_helper._ 
-@import views.html.oc_helper.bootstrap2._ 
 @import models._
+
+@implicitFieldConstructor = @{ FieldConstructor(bootstrap2FieldConstructor.f) } 
 
 @views.html.admin.loggedin_main() {
 
@@ -21,10 +22,10 @@
       <th>% Beschreibung </th>
     } { x: Field =>
       <td>
-        @inputText(x("name"),disabledOrNot())(noLabels.noLabelsField,lang)
+        @inputText(x("name"),disabledOrNot())(FieldConstructor(noLabelsFieldConstructor.f),lang)
       </td>
       <td>
-        @textarea(x("description"),disabledOrNot())(noLabels.noLabelsField,lang)
+        @textarea(x("description"),disabledOrNot())(FieldConstructor(noLabelsFieldConstructor.f),lang)
       </td>
     }
   }

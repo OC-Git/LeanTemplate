@@ -1,13 +1,14 @@
 @(implicit cDetails: CrudDetailsState, f: Form[MvTestFeature], viewType: controllers.ViewType)
 
 @import play.libs.Scala._ 
+@import views.html.helper._ 
 @import scala.collection.JavaConversions._ 
 @import controllers.admin.routes 
-@import views.html.helper._
 @import views.html.oc_helper._ 
-@import views.html.oc_helper.bootstrap2._ 
 @import models._
-@import views.html.oc_helper.noLabels
+
+
+@implicitFieldConstructor = @{ FieldConstructor(bootstrap2FieldConstructor.f) } 
 
 @views.html.admin.loggedin_main() {
 
@@ -24,10 +25,10 @@
       <th>% der User</th>
     } { x: Field =>
       <td>
-        @inputText(x("name"),disabledOrNot())(noLabels.noLabelsField,lang)
+        @inputText(x("name"),disabledOrNot())(FieldConstructor(noLabelsFieldConstructor.f),lang)
       </td>
       <td>
-        @inputNumber(x("percent"),disabledOrNot(), 'min->"0.0", 'max->"100.0", 'step->"0.001")(noLabels.noLabelsField,lang)
+        @inputNumber(x("percent"),disabledOrNot(), 'min->"0.0", 'max->"100.0", 'step->"0.001")(FieldConstructor(noLabelsFieldConstructor.f),lang)
       </td>
     }
         

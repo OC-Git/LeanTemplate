@@ -1,8 +1,10 @@
 @(implicit currentPage: com.avaje.ebean.Page[User], clist: CrudListState)
 
 @import controllers.admin.routes 
+@import views.html.helper._ 
 @import views.html.oc_helper._ 
-@import views.html.oc_helper.bootstrap2._
+
+@implicitFieldConstructor = @{ FieldConstructor(bootstrap2FieldConstructor.f) } 
 
 @views.html.admin.loggedin_main() {
 

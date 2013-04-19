@@ -2,8 +2,9 @@
 
 @import views.html.helper._ 
 @import scala.collection.JavaConversions._ 
-@import views.html.oc_helper.bootstrap2._
 @import views.html.oc_helper._ 
+
+@implicitFieldConstructor = @{ FieldConstructor(bootstrap2FieldConstructor.f) } 
 
 @loggedin_main() {
     
@@ -15,14 +16,15 @@
         
             @flashmessages()
             
-            <form class="well form-search" method="post">
+            <!--<form class="well form-search" method="post">-->
+            @helper.form(action = controllers.site.routes.Application.index(), 'class -> "well form-search") {
                 @inputText(
                   searchForm("query"), 
                   'placeholder -> "Suche", 
                   'class -> "input-large search-query"
                 )
                 <button type="submit" class="btn">Search</button>
-            </form>
+            }
       </div>
 
       

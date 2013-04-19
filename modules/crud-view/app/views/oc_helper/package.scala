@@ -149,7 +149,7 @@ package object oc_helper {
                     {
                       options.map { v =>
                         val value = optionValue(v)
-                        <option value={ value } selected={ if (values contains value) Option(Text("selected")) else null }>{ optionText(v) }</option>
+                        <option value={ value } selected={ if (values contains value) Option(Text("selected")) else None }>{ optionText(v) }</option>
                       }
                     }
                   </select>,

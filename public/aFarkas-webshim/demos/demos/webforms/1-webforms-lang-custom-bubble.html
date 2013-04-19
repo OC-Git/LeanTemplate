@@ -3,18 +3,22 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta charset="utf-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
 	<link href="../../css/styles.css" rel="stylesheet" />
 	
 	<style>
 		
 		fieldset div {
-			overflow: hidden;
 			zoom: 1;
 			padding: 5px;
 			border: 1px solid #000;
 			margin: 5px 0;
 		}
-		
+		fieldset div:after {
+			content: " ";
+			display: block;
+			clear: both;
+		}
 		
 		
 		.validity-alert .va-box,
@@ -27,8 +31,7 @@
 		}
 	</style>
 	
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-	<script src="../../js-webshim/minified/extras/mousepress.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 	<script src="../../js-webshim/minified/extras/modernizr-custom.js"></script>
 	<script>
 		// set options for html5shiv

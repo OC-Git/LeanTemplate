@@ -3,12 +3,12 @@ package authenticate;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import models.User;
 import play.Configuration;
 import play.Logger;
 import play.cache.Cache;
 import play.mvc.Http;
 import play.mvc.Http.Session;
-import models.User;
 
 public class Authenticated {
 

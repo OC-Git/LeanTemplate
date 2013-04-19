@@ -1,9 +1,21 @@
 package functional.test;
 
 //import static org.junit.Assert.*;
-import static org.junit.Assert.*;
-import static play.test.Helpers.*;
-import static testutil.TestHelper.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static play.test.Helpers.POST;
+import static play.test.Helpers.contentAsString;
+import static play.test.Helpers.contentType;
+import static play.test.Helpers.fakeRequest;
+import static play.test.Helpers.routeAndCall;
+import static testutil.TestHelper.assertFlashError;
+import static testutil.TestHelper.assertFlashSuccess;
+import static testutil.TestHelper.assertResultBad;
+import static testutil.TestHelper.assertResultOk;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -20,14 +32,13 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import authenticate.Authenticated;
-
 import play.mvc.Result;
 import testutil.TestHelper;
 import testutil.TestHelper.RedirCallback;
 import utils.test.MailBucket;
 import utils.test.MailBucket.Mail;
 import utils.test.SimpleSmtpMock;
+import authenticate.Authenticated;
 import functional.page.PasswordRecoverPage;
 import funcy.FunctionalTest;
 import funcy.Page;

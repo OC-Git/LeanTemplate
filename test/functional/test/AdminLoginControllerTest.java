@@ -1,7 +1,7 @@
 package functional.test;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import models.Role;
 import models.User;
 

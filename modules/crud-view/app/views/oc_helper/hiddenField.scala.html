@@ -1,7 +1,9 @@
 @(field: play.api.data.Field, args: (Symbol,Any)*)(implicit lang: play.api.i18n.Lang)
 
 @import views.html.helper._ 
-@import views.html.oc_helper.hidden._
+@import views.html.oc_helper._
+ 
+@implicitFieldConstructor = @{ FieldConstructor(hiddenFieldConstructor.f) } 
  
 @input(field, args:_*) { (id, name, value, htmlArgs) =>
     <input type="hidden" id="@id" name="@name" value="@value" @toHtmlArgs(htmlArgs)>

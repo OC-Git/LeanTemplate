@@ -1,13 +1,12 @@
 package controllers.site;
 
 import models.User;
-import controllers.DefaultLoginController;
-import controllers.site.routes;
-import controllers.forms.FlashScope;
-import controllers.forms.LoginForm;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.Result;
+import controllers.DefaultLoginController;
+import controllers.forms.FlashScope;
+import controllers.forms.LoginForm;
 
 public class LoginController extends DefaultLoginController {
 

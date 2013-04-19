@@ -4,13 +4,12 @@ import java.sql.Timestamp;
 import java.util.Random;
 
 import models.monitoring.MonitorFine;
-
-import com.avaje.ebean.Ebean;
-
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
 import authenticate.admin.AdminSecured;
+
+import com.avaje.ebean.Ebean;
 
 @Security.Authenticated(AdminSecured.class)
 public class TestController extends Controller {

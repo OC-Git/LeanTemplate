@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import play.db.DB;
-
 import ch.qos.logback.core.db.ConnectionSource;
 import ch.qos.logback.core.db.dialect.SQLDialectCode;
 

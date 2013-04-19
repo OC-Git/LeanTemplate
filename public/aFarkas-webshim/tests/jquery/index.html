@@ -8,7 +8,7 @@
 	<!-- Includes -->
 	<script src="data/testinit.js"></script>
 
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.js"></script>
 	
 	<script src="../../src/extras/modernizr-custom.js"></script>
 	<script src="../../src/polyfiller.js"></script>
@@ -35,21 +35,34 @@
 	</script>
 
 	
-
+	
 	<script src="unit/core.js"></script>
+	
 	<script src="unit/data.js"></script>
+	
 	<script src="unit/attributes.js"></script>
+	
 	<script src="unit/event.js"></script>
+	
+	<script src="unit/selector.js"></script>
+	
 	<script src="unit/traversing.js"></script>
+	
 	<script src="unit/manipulation.js"></script>
 	
+	
+	<script>
+		// html5shiv, enabling HTML5 elements to be used with jQuery
+		( "abbr article aside audio bdi canvas data datalist details figcaption figure footer header hgroup " +
+			"mark meter nav output progress section summary time video"
+		).replace(/\w+/g, function(n) {
+			document.createElement(n);
+		});
+	</script>
 </head>
 
 <body id="body">
-	
-	<h1 id="qunit-header"><a href="/jquery/test/index.html">jQuery Test Suite</a>
-		<a href="?jquery=min">(minified)</a>
-	</h1>
+	<h1 id="qunit-header"><a href="/jquery/test/index.html">jQuery Test Suite</a></h1>
 	<h2 id="qunit-banner"></h2>
 	<div id="qunit-testrunner-toolbar"></div>
 	<h2 id="qunit-userAgent"></h2>
@@ -132,7 +145,7 @@
 			<select name="select5" id="select5">
 				<option id="option5a" value="3">1</option>
 				<option id="option5b" value="2">2</option>
-				<option id="option5c" value="1">3</option>
+				<option id="option5c" value="1" data-attr="">3</option>
 			</select>
 
 			<object id="object1" codebase="stupid">
@@ -222,6 +235,10 @@ Z</textarea>
 			<div id="t2037">
 				<div><div class="hidden">hidden</div></div>
 			</div>
+			<div id="t6652">
+				<div></div>
+			</div>
+			<div id="no-clone-exception"><object><embed></embed></object></div>
 		</div>
 
 		<div id="tabindex-tests">
@@ -249,6 +266,14 @@ Z</textarea>
 		<div id="siblingTest">
 			<em id="siblingfirst">1</em>
 			<em id="siblingnext">2</em>
+			<em id="siblingthird">
+				<em id="siblingchild">
+					<em id="siblinggrandchild">
+						<em id="siblinggreatgrandchild"></em>
+					</em>
+				</em>
+			</em>
+			<span id="siblingspan"></span>
 		</div>
 	</div>
 	</dl>
@@ -278,5 +303,9 @@ Z</textarea>
 
 		<div id="fx-tests"></div>
 	</div>
+	<map name="imgmap" id="imgmap">
+		<area shape="rect" coords="0,0,200,50">
+	</map>
+
 </body>
 </html>

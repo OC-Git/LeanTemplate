@@ -8,7 +8,13 @@ import static org.junit.Assert.assertTrue;
 import static play.mvc.Http.Status.BAD_REQUEST;
 import static play.mvc.Http.Status.OK;
 import static play.mvc.Http.Status.SEE_OTHER;
-import static play.test.Helpers.*;
+import static play.test.Helpers.GET;
+import static play.test.Helpers.contentType;
+import static play.test.Helpers.fakeRequest;
+import static play.test.Helpers.flash;
+import static play.test.Helpers.redirectLocation;
+import static play.test.Helpers.routeAndCall;
+import static play.test.Helpers.status;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

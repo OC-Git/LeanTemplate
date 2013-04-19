@@ -13,7 +13,7 @@ public class CrudFinder<T extends CrudModel<T>> {
 	
 	public Finder<Long, T> finder;
 	public String labelDbFieldName;
-	
+
 	public CrudFinder(Finder<Long, T> finder, String labelDbFieldName) {
 		this.finder = finder;
 		this.labelDbFieldName = labelDbFieldName;

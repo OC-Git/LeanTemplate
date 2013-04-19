@@ -8,15 +8,15 @@ import models.ReportQueryParameter;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.ObjectNode;
 
-import com.avaje.ebean.Ebean;
-import com.avaje.ebean.SqlQuery;
-
 import play.data.Form;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
 import authenticate.admin.AdminSecured;
+
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.SqlQuery;
 
 @Security.Authenticated(AdminSecured.class)
 public class ReportingController extends Controller {

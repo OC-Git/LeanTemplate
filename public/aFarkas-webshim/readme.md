@@ -15,8 +15,8 @@ Implemented Features:
 
 * HTML5 shiv and innerShiv solution including basic CSS-support
 * canvas
-* HTML5 form features including: constraint validation and form widgets (input[range], input[date], input[time], input[datetime-local], output, input[list]/datalist)
-* HTML5 audio/video implementation
+* HTML5 form features including: constraint validation and form widgets (input[type="range"], input[type="date"], input[type="number"], output, input[list]/datalist)
+* HTML5 audio/video/track implementation
 * interactive elements: summary/details
 * JSON (stringify and parse)
 * localStorage/sessionStorage
@@ -32,7 +32,11 @@ How To Use
 
 ---------------
 	<script src="js/jquery.js"></script>
-	<script src="js/Modernizr-yepnope.js"></script> 
+	// Simple change
+	<script src="js-webshim/minified/extras/modernizr-custom.js"></script> 
+	// 'Use your own' variant
+	<script src="js/Modernizr-custom.js"></script> 
+
 	<script src="js-webshim/minified/polyfiller.js"></script> 
 
 	<script> 
@@ -75,84 +79,77 @@ forum](http://forum.jquery.com/using-jquery-plugins).
 
 **Please tag your questions with 'webshims' or 'polyfill'.**
 
-
-Release 1.8.10
+Release 1.10.2
 ----------
 
-- fixed validity issues with old webkits (Safari 5.0.0 - 5.0.2)
-- improved object/flash reframe handling for mediaelement
-- improved spinbutton usability
-- auto disable html5shiv's innerShiv, if jQuery 1.7+ is used
-- fixed input/change event for input widgets on iOS5
-- improved :required/:valid/:invalid pseudoselectos
-- added possibility for custom styleable datalists (in capable browsers)
-- added test for custom styleable input[type="range"]
-- temporarily removed support for time and datetime-local widgets
+- improved list/datalist options [demo](http://jsfiddle.net/trixta/7DETa/)
+- small improvements to type="range" and type="date" [demo](http://jsfiddle.net/trixta/VNuct/)
+- fixed animate bug in jQuery 1.8.3
+- fixed dutch language
 
-Release 1.8.9
+
+Release 1.10.0/1.10.1
 ----------
 
-- updated to Modernizr 2.5.3 (fixes crash bug in IE8)
-- improved field[placeholder] usability
-- fixed regression for iOS4 (old webkits)
-- updated email validation
+- new UI for all input widgets
+- input[type="month"]
+- progress element
+- list/datalist support for following types: range, month, date (datalist support for text/email/url/tel etc. was already there)
+- type="number" can be localized
+- type="number"/type="time" are custom styleable in supporting browsers
+- video[preload]/audio[preload] for "auto"/"" and "none" values
+- labels property for labellable form elements
+- stepUp/stepDown methods for input elements
 
-Release 1.8.8
+Release 1.9.6
 ----------
 
-- updated to Modernizr 2.5.2
-- use of yepnope's 1.5.2 low-level API for better network performance
-- improved scriptability of datalist and details/summary elements
+- jQuery 1.9.1 compatibility
+- improve flash fallback for mediaelements in case of an error event
 
-Release 1.8.7
+Release 1.9.5
 ----------
 
-- fixed Opera error
-- aligned maxlength property to the HTML5 spec
+- improve youtube playback with jarisplayer
+- fix position bug of error messages in nested overflow: scroll boxes
+- fix chrome issue with dynamically created required radio buttons
+- favorize custom validation message before vendor validation message
 
-Release 1.8.5/1.8.6
+
+Release 1.9.4
 ----------
 
-- much improved bug detection for buggy interactive constraint validation (no more assumptions)
-- new custom event **changedvaliditystate** for forms feature
-- improved overlay placement (errormessage/datalist)
+- improved rtmp handling for both Jaris and JW player
+- fixed bug on iOS in conjunction with input[type=date]
+- fixed creditcard validation
+- allow placeholder for type=number
+- show mediaelement fallback, if flash isn't installed and mediaelements aren't supported
+- a lot of improvements to the free and open source swf media player Jaris (we will switch to Jaris by default with next release)
 
-Release 1.8.4
+
+Release 1.9.3
 ----------
 
-- improved network performance
-- polyfiller supports AMD + async pre-configuration
-- Opera bugfix
+- add option to use alternative jarisplayer as mediaelement fallback
+- fixed track[default] in IE10 (initial copying of track.mode)
+- implement .prop-checked in browsers, which do not support the :checked selector
+- implement .user-error selector
+- limit track.kind property using addTextTrack to only known values
 
-Release 1.8.3
+Release 1.9.2
 ----------
 
-- chrome/webkit fixes
-- full compatibility with jQuery 1.7
-- added locales for errormessages (If you want to improve [existing messages](https://github.com/aFarkas/webshim/tree/master/src/shims/i18n) or add some errormessages, please send me a pull request or file an issue)
-- improved progress event for older Safari mobile and Firefox
+- implemented input[type="time"]
+- allow dynamically changing label/kind/srclang of existing track elements
+- added removeCue to texttrack API
+- added screenreader-support for track[kind="descriptions"]
+- improved change events for input[type=range] and spinbutton controls (input[type=number])
 
-Release 1.8.2
-----------
-- improved mediaelement (canplaythrough event, http live streaming for iOS)
-- moved input[list]/datalist support from 'forms' to 'forms-ext' feature (more lightweight for Chrome/Safari)
-- improved styleability of errorbubble
-- <del>compatibility with jQuery 1.7 (1.8.1 is not compatible with jQuery 1.7)</del>
-
-Release 1.8.1
-----------
-- improved mediaelement loading
-- fixed small bugs in mediaelement polyfill
-- prepare for jQuery 1.7 compatibility
-- fixed demos
-
-
-Release 1.8.0
+Release 1.9.1
 ----------
 
-* first mediaelement implementation (audio/video)
-* implemented form submitter attributes (formaction, formtarget, formenctype)
-* better language support
-* updated es5-shim
-* updated jQuery UI path 
-* fixed label for output element
+- added onaddtrack/onremovetrack events to TextTrackList interface
+- datalist polyfill is now default for forms feature
+- added swedish locale (thx to @leon)
+- improved errorbubble style
+- updated JW player

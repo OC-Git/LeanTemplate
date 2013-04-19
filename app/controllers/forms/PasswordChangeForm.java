@@ -1,7 +1,10 @@
 package controllers.forms;
 
-import static play.data.validation.Constraints.*;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+
+import play.data.validation.Constraints.Email;
+import play.data.validation.Constraints.MinLength;
+import play.data.validation.Constraints.Required;
 
 
 public class PasswordChangeForm {

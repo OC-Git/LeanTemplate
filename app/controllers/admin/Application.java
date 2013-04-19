@@ -1,10 +1,10 @@
 package controllers.admin;
 
-import authenticate.admin.AdminSecured;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
-import views.html.admin.*;
+import views.html.admin.index;
+import authenticate.admin.AdminSecured;
 
 @Security.Authenticated(AdminSecured.class)
 public class Application extends Controller {

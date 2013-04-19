@@ -1,19 +1,15 @@
 package functional.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-
 import static play.mvc.Http.Status.BAD_REQUEST;
-import static play.test.Helpers.*;
-
-import play.api.test.Helpers;
-import play.mvc.Result;
-
-import testutil.TestHelper;
+import static play.test.Helpers.contentAsString;
+import static play.test.Helpers.contentType;
+import static play.test.Helpers.status;
 import static testutil.TestHelper.assertPasswordHash;
 import static testutil.TestHelper.log;
 
@@ -33,14 +29,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import authenticate.Authenticated;
-
-
+import play.mvc.Result;
+import testutil.TestHelper;
 import utils.CountryHelper;
 import utils.test.MailBucket;
 import utils.test.SimpleSmtpMock;
-import views.html.oc_helper.flashmessages;
-
+import authenticate.Authenticated;
 import functional.page.RegistrationPage;
 import funcy.FunctionalTest;
 import funcy.Page;

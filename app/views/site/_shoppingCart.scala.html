@@ -1,7 +1,9 @@
 @(user: models.User)
 
-@import views.html.oc_helper.bootstrap2._
+@import views.html.helper._ 
 @import views.html.oc_helper._ 
+
+@implicitFieldConstructor = @{ FieldConstructor(bootstrap2FieldConstructor.f) } 
 
     <table class="table table-striped table-bordered table-condensed">
       <thead>

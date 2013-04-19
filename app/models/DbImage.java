@@ -5,9 +5,9 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToOne;
 
-import com.avaje.ebean.annotation.PrivateOwned;
-
 import play.data.validation.Constraints.Required;
+
+import com.avaje.ebean.annotation.PrivateOwned;
 
 @SuppressWarnings("serial")
 @Entity

@@ -1,24 +1,26 @@
 package controllers.site;
 
+import global.AppConfigResolver;
+
 import java.sql.Timestamp;
 
-import global.AppConfigResolver;
+import models.User;
+
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.apache.commons.mail.Email;
 
-import com.avaje.ebean.Ebean;
-import com.avaje.ebean.TxRunnable;
-
-import authenticate.Authenticated;
-
-import models.User;
 import play.Logger;
 import play.api.templates.Html;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import utils.MailHelper;
+import authenticate.Authenticated;
+
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.TxRunnable;
+
 import controllers.forms.EMailForm;
 import controllers.forms.FlashScope;
 import controllers.forms.PasswordChangeForm;

@@ -16,25 +16,25 @@
 	var Modernizr = window.Modernizr;
 	var asyncWebshims = window.asyncWebshims;
 	var addTest = Modernizr.addTest;
-	var browserVersion = parseFloat($.browser.version, 10);
 	var Object = window.Object;
 	var html5 = window.html5 || {};
 	
-	Modernizr.genericDOM = !!($('<video><div></div></video>')[0].innerHTML);
-	
 	Modernizr.advancedObjectProperties = Modernizr.objectAccessor = Modernizr.ES5 = !!('create' in Object && 'seal' in Object);
-		
+	
+	if(!$.event.customEvent){
+		$.event.customEvent = {};
+	}
 	
 	var webshims = {
-		version: '1.8.11pre',
+		version: '1.10.3pre',
 		cfg: {
 			useImportantStyles: true,
-			//removeFOUC: false,
 			//addCacheBuster: false,
 			waitReady: true,
 			extendNative: true,
 			loadStyles: true,
 			disableShivMethods: true,
+			wspopover: {appendTo: 'body', hideOnBlur: true},
 			basePath: (function(){
 				var script = jScripts.filter('[src*="polyfiller.js"]');
 				var path;
@@ -45,7 +45,6 @@
 			})()
 		},
 		bugs: {},
-		browserVersion: browserVersion,
 		/*
 		 * some data
 		 */
@@ -55,11 +54,9 @@
 		setOptions: function(name, opts){
 			if (typeof name == 'string' && opts !== undefined) {
 				webCFG[name] = (!$.isPlainObject(opts)) ? opts : $.extend(true, webCFG[name] || {}, opts);
+			} else if (typeof name == 'object') {
+				$.extend(true, webCFG, name);
 			}
-			else 
-				if (typeof name == 'object') {
-					$.extend(true, webCFG, name);
-				}
 		},
 		addPolyfill: function(name, cfg){
 			cfg = cfg || {};
@@ -69,6 +66,22 @@
 				webshimsFeatures[feature].delayReady = 0;
 				webshims.featureList.push(feature);
 				webCFG[feature] = {};
+			}
+			
+			if(!webshimsFeatures[feature].failedM && cfg.nM){
+				$.each(cfg.nM.split(' '), function(i, name){
+					if(!(name in Modernizr)){
+						webshimsFeatures[feature].failedM = name;
+						return false;
+					}
+				});
+			}
+			
+			if(webshimsFeatures[feature].failedM){
+				cfg.test = function(){
+					webshims.error('webshims needs Modernizr.'+webshimsFeatures[feature].failedM + ' to implement feature: '+ feature);
+					return true;
+				};
 			}
 			webshimsFeatures[feature].push(name);
 			cfg.options = $.extend(webCFG[feature], cfg.options);
@@ -80,14 +93,37 @@
 				});
 			}
 		},
-		
 		polyfill: (function(){
+			var loaded = {};
+			var called;
+			return function(features){
+				if(!features){
+					features = webshims.featureList;
+				}
+					
+				if (typeof features == 'string') {
+					features = features.split(' ');
+				}
+				if(called){
+					webshims.warn('polyfill already called, you might want to use updatePolyfill instead? see: bit.ly/12BtXX3. polyfill should be called only once.');
+				}
+				called = true;
+				for(var i = 0; i < features.length; i++){
+					if(features[i] in loaded){
+						webshims.warn(features[i] +' already loaded, you might want to use updatePolyfill instead? see: bit.ly/12BtXX3');
+					}
+					loaded[features[i]] = true;
+				}
+				return webshims._polyfill(features);
+			};
+		})(),
+		_polyfill: (function(){
 			var firstPolyfillCall = function(features){
 				var addClass = [];
 				var onReadyEvts = features;
 				var timer;
 				
-				if(webCFG.disableShivMethods && Modernizr.genericDOM && 'html5Clone' in $.support){
+				if(webCFG.disableShivMethods){
 					html5.shivMethods = false;
 				}
 				
@@ -97,11 +133,15 @@
 					clearTimeout(timer);
 				};
 				
+				
+				
 				addClass.push('loading-polyfills');
-				$(window).bind('load.lP error.lP', removeLoader);
 				timer = setTimeout(function(){
 					$('html').addClass('long-loading-polyfills');
-				}, 600);
+					timer = setTimeout(removeLoader, 300);
+				}, 300);
+				$(window).on('load.lP error.lP', removeLoader);
+				
 				if (webCFG.waitReady && $.isReady) {
 					webshims.warn('Call webshims.polyfill before DOM-Ready or set waitReady to false.');
 				}
@@ -123,11 +163,6 @@
 				
 				var toLoadFeatures = [];
 				
-				features = features || webshims.featureList;
-				
-				if (typeof features == 'string') {
-					features = features.split(' ');
-				}
 				if(!loadedFormBase){
 					loadedFormBase = $.inArray('forms', features) !== -1;
 					if(!loadedFormBase && $.inArray('forms-ext', features) !== -1){
@@ -145,7 +180,7 @@
 				
 				$.each(features, function(i, feature){
 					if(!webshimsFeatures[feature]){
-						webshims.warn("could not find webshims-feature (aborted): "+ feature);
+						webshims.error("could not find webshims-feature (aborted): "+ feature);
 						isReady(feature, true);
 						return;
 					}
@@ -216,7 +251,7 @@
 						details.handler.call(this, name);
 					}
 				});
-				$.event.trigger(name);
+				$(document).triggerHandler(name);
 			}
 			return !!(special[name] && special[name].add) || false;
 		},
@@ -249,9 +284,7 @@
 		 * basic DOM-/jQuery-Helpers
 		 */
 		
-		fixHTML5: function(h){
-			return h;
-		},
+		
 		capturingEvents: function(names, _maybePrevented){
 			if (!document.addEventListener) {
 				return;
@@ -265,7 +298,7 @@
 					if (_maybePrevented && webshims.capturingEventPrevented) {
 						webshims.capturingEventPrevented(e);
 					}
-					return $.event.handle.call(this, e);
+					return $.event.dispatch.call(this, e);
 				};
 				special[name] = special[name] || {};
 				if (special[name].setup || special[name].teardown) {
@@ -284,7 +317,7 @@
 		register: function(name, fn){
 			var module = modules[name];
 			if (!module) {
-				webshims.warn("can't find module: " + name);
+				webshims.error("can't find module: " + name);
 				return;
 			}
 			if (module.noAutoCallback) {
@@ -292,10 +325,9 @@
 					fn($, webshims, window, document, undefined, module.options);
 					isReady(name, true);
 				};
-				if (module.d) {
+				if (module.d && module.d.length) {
 					onReady(module.d, ready);
-				}
-				else {
+				} else {
 					ready();
 				}
 			}
@@ -314,7 +346,7 @@
 				}
 				$.each(ext.c, function(i, comboname){
 					if(!webshims.c[comboname]){
-						webshims.c[comboname] = []
+						webshims.c[comboname] = [];
 					}
 					webshims.c[comboname].push(name);
 				});
@@ -514,7 +546,7 @@
 	$.webshims = webshims;
 	var protocol = (location.protocol == 'https:') ? 'https://' : 'http://';
 	var googleAPIs = protocol + 'ajax.googleapis.com/ajax/libs/';
-	var uiLib = googleAPIs + 'jqueryui/1.8.21/';
+	var uiLib = googleAPIs + 'jqueryui/1.10.2/';
 	var webCFG = webshims.cfg;
 	var webshimsFeatures = webshims.features;
 	var isReady = webshims.isReady;
@@ -524,6 +556,7 @@
 	var loader = webshims.loader;
 	var loadList = loader.loadList;
 	var addModule = loader.addModule;
+	var bugs = webshims.bugs;
 	var removeCombos = [];
 	var importantLogs = {
 		warn: 1,
@@ -611,34 +644,30 @@
 	//Overwrite DOM-Ready and implement a new ready-method
 	(function(){
 		$.isDOMReady = $.isReady;
-		if(!$.isDOMReady){
-			var $Ready = $.ready;
-			$.ready = function(unwait){
-				if(unwait !== true && !$.isDOMReady){
-					if(document.body){
-						$.isDOMReady = true;
-						isReady('DOM', true);
-						$.ready = $Ready;
-					} else {
-						setTimeout(function(){
-							$.ready(unwait);
-						}, 13);
-					}
-				}
-				return $Ready.apply(this, arguments);
-			};
-		} else {
-			isReady('DOM', true);
-		}
-		$(function(){
+		var onReady = function(){
 			$.isDOMReady = true;
 			isReady('DOM', true);
 			setTimeout(function(){
 				isReady('WINDOWLOAD', true);
 			}, 9999);
-		});
+		};
+		if(!$.isDOMReady){
+			var $Ready = $.ready;
+			$.ready = function(unwait){
+				if(unwait !== true && document.body){
+					onReady();
+					$.ready = $Ready;
+				}
+				return $Ready.apply(this, arguments);
+			};
+			$.ready.promise = $Ready.promise;
+		} else {
+			onReady();
+		}
+		$(onReady);
+		
 		$(window).load(function(){
-			isReady('DOM', true);
+			onReady();
 			isReady('WINDOWLOAD', true);
 		});
 	})();
@@ -686,7 +715,7 @@
 		});
 		
 		$.fn.htmlPolyfill = function(a){
-			var ret = $.fn.html.call(this, (a) ? webshims.fixHTML5(a) : a);
+			var ret = $.fn.html.call(this,  a);
 			if(ret === this && $.isDOMReady){
 				this.each(function(){
 					if(this.nodeType == 1){
@@ -697,13 +726,16 @@
 			return ret;
 		};
 		
+		$.fn.jProp = function(){
+			return $($.fn.prop.apply(this, arguments) || []);
+		};
 		
 		$.each(['after', 'before', 'append', 'prepend', 'replaceWith'], function(i, name){
 			$.fn[name+'Polyfill'] = function(a){
-				var elems = $(webshims.fixHTML5(a));
-				$.fn[name].call(this, elems);
+				a = $(a);
+				$.fn[name].call(this, a);
 				if($.isDOMReady){
-					elems.each(function(){
+					a.each(function(){
 						if (this.nodeType == 1) {
 							webshims.triggerDomUpdate(this);
 						}
@@ -717,13 +749,17 @@
 		$.each(['insertAfter', 'insertBefore', 'appendTo', 'prependTo', 'replaceAll'], function(i, name){
 			$.fn[name.replace(/[A-Z]/, function(c){return "Polyfill"+c;})] = function(){
 				$.fn[name].apply(this, arguments);
-				webshims.triggerDomUpdate(this);
+				if($.isDOMReady){
+					webshims.triggerDomUpdate(this);
+				}
 				return this;
 			};
 		});
 		
 		$.fn.updatePolyfill = function(){
-			webshims.triggerDomUpdate(this);
+			if($.isDOMReady){
+				webshims.triggerDomUpdate(this);
+			}
 			return this;
 		};
 		
@@ -799,21 +835,39 @@
 	
 	addModule('jquery-ui', {
 		src: uiLib+'jquery-ui.min.js',
-		test: function(){return !!($.widget && $.Widget);}
-	});
-	
-	addModule('input-widgets', {
-		src: '',
 		test: function(){
-			return !this.src || !($.widget && !($.fn.datepicker && $.fn.slider));
+			webshims.warn('deprecated module: '+ this.name);
+			return !!($.widget && $.Widget);
 		}
 	});
 	
 	addModule('swfobject', {
 		src: googleAPIs+'swfobject/2.2/swfobject.js',
-		test: function(){return ('swfobject' in window);}
+		test: function(){
+			webshims.warn('deprecated module: '+ this.name);
+			return ('swfobject' in window);
+		}
 	});
 	
+	addModule('input-widgets', {
+		src: '',
+		test: function(){
+			webshims.warn('deprecated module: '+ this.name);
+			return !this.src || !($.widget && !($.fn.datepicker && $.fn.slider));
+		}
+	});
+	
+	
+	addModule('swfmini', {
+		test: function(){
+			if(window.swfobject && !window.swfmini){
+				window.swfmini = window.swfobject;
+			}
+			return ('swfmini' in window);
+		},
+		c: [16, 7, 2, 8, 1, 12, 19, 23]
+	});
+	modules.swfmini.test();
 		
 	/* 
 	 * polyfill-Modules 
@@ -822,251 +876,269 @@
 	// webshims lib uses a of http://github.com/kriskowal/es5-shim/ to implement
 	addPolyfill('es5', {
 		test: !!(Modernizr.ES5 && Function.prototype.bind),
-		c: [10, 1, 22]
+		c: [14, 18, 19, 20]
 	});
 	
 	addPolyfill('dom-extend', {
 		f: DOMSUPPORT,
 		noAutoCallback: true,
 		d: ['es5'],
-		c: [10, 9, 12, 17, 16, 8, 1, 24, 19, 11, 13]
+		c: [16, 7, 2, 15, 3, 8, 4, 9, 10, 14, 19, 20]
 	});
 		
 	
-	//<localstorage combos: 14
-	if('localstorage' in Modernizr) {
-		addPolyfill('json-storage', {
-			test: Modernizr.localstorage && 'sessionStorage' in window && 'JSON' in window,
-			loadInit: function(){
-				loadList(['swfobject']);
-			},
-			noAutoCallback: true,
-			c: [14]
-		});
-	}
-	//>localstorage
+	//<json-storage
+	
+	addPolyfill('json-storage', {
+		test: Modernizr.localstorage && 'sessionStorage' in window && 'JSON' in window,
+		d: ['swfmini'],
+		noAutoCallback: true,
+		c: [14],
+		nM: 'localstorage'
+	});
+	//>json-storage
 	
 	
-	//<geolocation combos: 14,15
-	if('geolocation' in Modernizr){
-		addPolyfill('geolocation', {
-			test: Modernizr.geolocation,
-			options: {
-				destroyWrite: true
-	//			,confirmText: ''
-			},
-			d: ['json-storage'],
-			c: [14, 15]
-		});
-	}
+	//<geolocation
+	
+	addPolyfill('geolocation', {
+		test: Modernizr.geolocation,
+		options: {
+			destroyWrite: true
+//			,confirmText: ''
+		},
+		d: ['json-storage'],
+		c: [21],
+		nM: 'geolocation'
+	});
 	//>
 	
 	//<canvas
 	(function(){
-		if('canvas' in Modernizr) {
-			var flashCanvas;
-			addPolyfill('canvas', {
-				src: 'excanvas',
-				test: Modernizr.canvas,
-				options: {type: 'excanvas'}, //excanvas | flash | flashpro
-				noAutoCallback: true,
-				loadInit: function(){
-					var type = this.options.type;
-					var src;
-					if(type && type.indexOf('flash') !== -1 && (!window.swfobject || swfobject.hasFlashPlayerVersion('9.0.0'))){
-						window.FlashCanvasOptions = window.FlashCanvasOptions || {};
-						flashCanvas = FlashCanvasOptions;
-						if(type == 'flash'){
-							$.extend(flashCanvas, {
-								swfPath: webCFG.basePath + 'FlashCanvas/'
-							});
-							this.src = 'FlashCanvas/flashcanvas';
-							src = flashCanvas.swfPath + 'flashcanvas.swf';
-						} else {
-							$.extend(flashCanvas, {swfPath: webCFG.basePath + 'FlashCanvasPro/'});
-							this.src = 'FlashCanvasPro/flashcanvas';
-							//assume, that the user has flash10+
-							src = flashCanvas.swfPath + 'flash10canvas.swf';
-						}
-						//todo: implement cachbuster for flashcanvas
-	//					if(webCFG.addCacheBuster){
-	//						src += webCFG.addCacheBuster;
-	//					}
-					}
-				},
-				afterLoad: function(){
-					webshims.addReady(function(context, elem){
-						if(context == document){
-							if(window.G_vmlCanvasManager && G_vmlCanvasManager.init_ ){
-								G_vmlCanvasManager.init_(document);
-							}
-						}
-						$('canvas', context).add(elem.filter('canvas')).each(function(){
-							var hasContext = this.getContext;
-							if(!hasContext && window.G_vmlCanvasManager){
-								G_vmlCanvasManager.initElement(this);
-							}
+		var flashCanvas;
+		addPolyfill('canvas', {
+			src: 'excanvas',
+			test: Modernizr.canvas,
+			options: {type: 'flash'}, //excanvas | flash | flashpro
+			noAutoCallback: true,
+			
+			loadInit: function(){
+				var type = this.options.type;
+				var src;
+				if(type && type.indexOf('flash') !== -1 && (!modules.swfmini.test() || swfmini.hasFlashPlayerVersion('9.0.0'))){
+					window.FlashCanvasOptions = window.FlashCanvasOptions || {};
+					flashCanvas = FlashCanvasOptions;
+					if(type == 'flash'){
+						$.extend(flashCanvas, {
+							swfPath: webCFG.basePath + 'FlashCanvas/'
 						});
-						if(context == document){
-							isReady('canvas', true);
+						this.src = 'FlashCanvas/flashcanvas';
+						src = flashCanvas.swfPath + 'flashcanvas.swf';
+					} else {
+						$.extend(flashCanvas, {swfPath: webCFG.basePath + 'FlashCanvasPro/'});
+						this.src = 'FlashCanvasPro/flashcanvas';
+						//assume, that the user has flash10+
+						src = flashCanvas.swfPath + 'flash10canvas.swf';
+					}
+					//todo: implement cachbuster for flashcanvas
+//					if(webCFG.addCacheBuster){
+//						src += webCFG.addCacheBuster;
+//					}
+				}
+			},
+			afterLoad: function(){
+				webshims.addReady(function(context, elem){
+					if(context == document){
+						if(window.G_vmlCanvasManager && G_vmlCanvasManager.init_ ){
+							G_vmlCanvasManager.init_(document);
+						}
+					}
+					$('canvas', context).add(elem.filter('canvas')).each(function(){
+						var hasContext = this.getContext;
+						if(!hasContext && window.G_vmlCanvasManager){
+							G_vmlCanvasManager.initElement(this);
 						}
 					});
-				},
-				methodNames: ['getContext'],
-				d: [DOMSUPPORT]
-			});
-		}
+					if(context == document){
+						isReady('canvas', true);
+					}
+				});
+			},
+			methodNames: ['getContext'],
+			d: [DOMSUPPORT],
+			nM: 'canvas'
+		});
 	})();
 	//>
 	
 	
-	//<forms combos: 3, 2, 59, 17, 16, 5, 4, 24, 19, 18, 7, 59, 5, 21, 11, 23
-	var modernizrInputAttrs = Modernizr.input;
-	var modernizrInputTypes = Modernizr.inputtypes;
-	
-	if(modernizrInputAttrs && modernizrInputTypes){
+	//<forms
+	(function(){
+		var modernizrInputAttrs = Modernizr.input;
+		var modernizrInputTypes = Modernizr.inputtypes;
 		var formvalidation = 'formvalidation';
-		var formOptions;
-		var select = $('<select required name="a"><option disabled /></select>')[0];
-		addTest(formvalidation, function(){
-			return !!(modernizrInputAttrs.required && modernizrInputAttrs.pattern);
-		});
+		var select = $('<select required="" name="a"><option disabled="" /></select>')[0];
+		var bustedValidity = false;
+		var formExtend, formOptions;
 		
-		if(Modernizr[formvalidation]){
-			webshims.bugs.bustedValidity = !($('<input type="date" value="1488-12-11" />')[0].validity || {valid: true}).valid || !('required' in select) || (select.validity || {}).valid;
-		}
-		
-		addTest('styleableinputrange', function(){
-			if(!modernizrInputTypes.range){
-				return false;
+		var initialFormTest = function(){
+			if(!initialFormTest.run){
+				addTest(formvalidation, function(){
+					return !!(modernizrInputAttrs.required && modernizrInputAttrs.pattern);
+				});
+				addTest('fieldsetdisabled', function(){
+					var fieldset = $('<fieldset />')[0];
+					return 'elements' in fieldset && 'disabled' in fieldset;
+				});
+				
+				if(Modernizr[formvalidation]){
+					bugs.bustedValidity = bustedValidity = Modernizr.formattribute === false || !Modernizr.fieldsetdisabled || !('value' in document.createElement('progress')) || !('value' in document.createElement('output')) || !($('<input type="date" value="1488-12-11" />')[0].validity || {valid: true}).valid || !('required' in select) || (select.validity || {}).valid;
+				}
+				
+				formExtend = Modernizr[formvalidation] && !bustedValidity ? 'form-native-extend' : 'form-shim-extend';
+				
+				//ToDo: MSIE10 is also styleable!!!
+				addTest('styleableinputrange', function(){
+					if(!modernizrInputTypes.range){
+						return false;
+					}
+					var input = document.createElement('input');
+					input.setAttribute('type', 'range');
+					return input.style.WebkitAppearance !== undefined;
+				});
 			}
-			var input = document.createElement('input');
-			input.setAttribute('type', 'range');
-			return input.style.WebkitAppearance !== undefined;
-		});
+			initialFormTest.run = true;
+			return false;
+		};
 		
 		
+		webshims.formcfg = [];
 		webshims.validationMessages = webshims.validityMessages = [];
 		webshims.inputTypes = {};
 				
 		addPolyfill('form-core', {
 			f: 'forms',
 			d: ['es5'],
-			test: function(toLoad){
-				if(formOptions.lightweightDatalist && !this.datalistLoaded){
-					this.datalistLoaded = true;
-					modules['form-datalist'].f = 'forms';
-					webshims.reTest(['form-datalist']);
-				}
-				return false;
-			},
+			test: initialFormTest,
 			options: {
 				placeholderType: 'value',
-				langSrc: 'i18n/errormessages-',
-				availabeLangs: ['ar', 'ch-ZN', 'el', 'es', 'fr', 'he', 'hi', 'hu', 'it', 'ja', 'nl', 'pt-PT', 'ru'] //en and de are directly implemented in core
+				langSrc: 'i18n/formcfg-',
+				messagePopover: {},
+				datalistPopover: {
+					constrainWidth: true
+				},
+				availabeLangs: ['ar', 'ch-ZN', 'el', 'es', 'fr', 'he', 'hi', 'hu', 'it', 'ja', 'nl', 'pt-PT', 'ru', 'sv'] //en and de are directly implemented in core
 	//			,customMessages: false,
 	//			overrideMessages: false,
-	//			replaceValidationUI: false,
-	//			lightweightDatalist: false
+	//			replaceValidationUI: false
 			},
 			methodNames: ['setCustomValidity','checkValidity'],
-			c: [3, 2, 59, 17, 16, 5, 4, 24, 19]
+			c: [16, 7, 2, 8, 1, 15, 3],
+			nM: 'input'
 		});
 		
 		formOptions = webCFG.forms;
 				
-		if(Modernizr[formvalidation] && !webshims.bugs.bustedValidity){
-			addPolyfill('form-extend', {
-				f: 'forms',
-				src: 'form-native-extend',
-				test: function(toLoad){
-					return ((modules['form-number-date-api'].test() || $.inArray('form-number-date-api', toLoad  || []) == -1) && !formOptions.overrideMessages );
-				},
-				d: ['form-core', DOMSUPPORT, 'form-message'],
-				c: [18, 7, 59, 5]
-			});
-			removeCombos = removeCombos.concat([2, 3, 23, 21]);
-				
-		} else {
-			removeCombos = removeCombos.concat([18, 7, 4, 59, 5]);
-			
-			addPolyfill('form-extend', {
-				f: 'forms',
-				src: 'form-shim-extend',
-				test: function(){
-					return false;
-				},
-				d: ['form-core', DOMSUPPORT],
-				c: [3, 2, 23, 21]
-			});
-		}
+		addPolyfill('form-native-extend', {
+			f: 'forms',
+			test: function(toLoad){
+				initialFormTest();
+				return (!Modernizr[formvalidation] || bustedValidity) || ((modules['form-number-date-api'].test() || $.inArray('form-number-date-api', toLoad  || []) == -1) && !formOptions.overrideMessages );
+			},
+			d: ['form-core', DOMSUPPORT, 'form-message'],
+			c: [6, 5]
+		});
+		
+		addPolyfill('form-shim-extend', {
+			f: 'forms',
+			test: function(){
+				initialFormTest();
+				return Modernizr[formvalidation] && !bustedValidity;
+			},
+			d: ['form-core', DOMSUPPORT],
+			c: [16, 15]
+		});
 		
 		addPolyfill('form-message', {
 			f: 'forms',
 			test: function(toLoad){
-				return !( formOptions.customMessages || !Modernizr[formvalidation] || !modules['form-extend'].test(toLoad) || webshims.bugs.validationMessage );
+				initialFormTest();
+				return !( formOptions.customMessages || !Modernizr[formvalidation] || bugs.validationMessage || bustedValidity || !modules[formExtend].test(toLoad) );
 			},
 			d: [DOMSUPPORT],
-			c: [3, 2, 23, 21, 59, 17, 5, 4]
+			c: [16, 7, 15, 3, 8, 4]
 		});
-		
-		webshims.addPolyfill('form-output', {
-			f: 'forms',
-			test: ('value' in document.createElement('output')),
-			d: [DOMSUPPORT],
-			c: [3, 2, 23, 21]
-		});
-		
 		
 		addPolyfill('form-number-date-api', {
 			f: 'forms-ext',
-			uiTest: function(){return (modernizrInputTypes.range && modernizrInputTypes.date /*&& modernizrInputTypes.time*/ && modernizrInputTypes.number);},
-			test: function(toLoad){
-				return (this.uiTest() && !webshims.bugs.valueAsNumberSet);
+			options: {
+				types: 'range date time number month'
 			},
+			test: function(toLoad){
+				var ret = true;
+				var types = this.options.types;
+				if(typeof types != 'string'){
+					webshims.warn("types should be a whitespace seperated string");
+				} else {
+					types = types.split(' ');
+				}
+				initialFormTest();
+				$.each(types, function(i, name){
+					if(!modernizrInputTypes[name]){
+						ret = false;
+						return false;
+					}
+				});
+				return ret;
+			},
+			methodNames: ['stepUp', 'stepDown'],
 			d: ['forms', DOMSUPPORT],
-			c: [18, 7, 6]
+			c: [6, 5, 18, 17],
+			nM: 'input inputtypes'
+		});
+		
+		$.webshims.loader.addModule('range-ui', {
+			options: {},
+			noAutoCallback: true,
+			test: function(){
+				return !!$.fn.rangeUI;
+			},
+			d: ['es5'],
+			c: [6, 5, 9, 10, 18, 17, 11]
 		});
 		
 		addPolyfill('form-number-date-ui', {
 			f: 'forms-ext',
-			test: function(){return modules['form-number-date-api'].test() && !this.options.replaceUI;},
-			d: ['forms', DOMSUPPORT, 'form-number-date-api'],
-			loadInit: function(){
-				loadList(['jquery-ui']);
-				if(modules['input-widgets'].src){
-					loadList(['input-widgets']);
-				}
+			test: function(){
+				initialFormTest();
+				return !this.options.replaceUI && modules['form-number-date-api'].test();
 			},
+			d: ['forms', DOMSUPPORT, 'form-number-date-api', 'range-ui'],
 			options: {
-				stepArrows: {number: 1, time: 1}, 
-				calculateWidth: true,
-				slider: {},
-				datepicker: {},
-				langSrc: uiLib+'i18n/jquery.ui.datepicker-',
-				recalcWidth: true
-	//			,lazyDate: undefined // true for IE8- false for fast browser 
+				
+				widgets: {
+					calculateWidth: true,
+					monthNames: 'monthNamesShort',
+					monthNamesHead: 'monthNames'
+				}
 	//			,replaceUI: false
 			},
-			c: [18, 7, 6]
+			c: [6, 5, 9, 10, 18, 17, 11]
 		});
 		
-//		if(!modernizrInputAttrs.list && browserVersion > 536.7 && $.browser.webkit && ('list') in $('<input />')[0]){
-//			modernizrInputAttrs.list = true;
-//		}
-		
 		addPolyfill('form-datalist', {
-			f: 'forms-ext',
+			f: 'forms',
 			test: function(){
+				initialFormTest();
 				return modernizrInputAttrs.list && !formOptions.customDatalist;
 			},
 			d: ['form-core', DOMSUPPORT],
-			c: [3, 59, 18, 24, 19, 11]
+			c: [16, 7, 6, 2, 9, 15]
 		});
-	}
+	})();
 	//>
 	
-	//<details combos: 12,13,15
+	//<details
 	if(!('details' in Modernizr)){
 		addTest('details', function(){
 			return ('open' in document.createElement('details'));
@@ -1079,45 +1151,79 @@
 //			animate: false,
 			text: 'Details'
 		},
-		c: [12, 13, 15]
+		c: [21, 22]
 	});
 	//>
 	
-	//<mediaelement combos: 10, 9, 12, 17, 16, 8, 20, 22, 23, 24
-	if ('audio' in Modernizr && 'video' in Modernizr){
+	//<mediaelement
+	(function(){
 		webshims.mediaelement = {};
+		var swfTest = function(){
+			if(!Modernizr.audio || !Modernizr.video || webshims.mediaelement.loadSwf){
+				return false;
+			}
+			
+			var options = this.options;
+			if(options.preferFlash && !modules.swfmini.test()){
+				options.preferFlash = false;
+			}
+			return !( options.preferFlash && window.swfmini.hasFlashPlayerVersion('9.0.115') );
+		};
+		var deps = ['swfmini', DOMSUPPORT];
 		
 		addPolyfill('mediaelement-core', {
 			f: 'mediaelement',
 			noAutoCallback: true,
-			
-			d: ['swfobject',DOMSUPPORT],
-			c: [10, 9, 12, 17, 16, 8, 22, 23, 24, 20]
+			options: {
+				preferFlash: false,
+				player: 'jaris',
+				vars: {},
+				params: {},
+				attrs: {},
+				changeSWF: $.noop
+			},
+			methodNames: ['play', 'pause', 'canPlayType', 'mediaLoad:load'],
+			d: ['swfmini'],
+			c: [16, 7, 2, 8, 1, 12, 13, 19, 20, 23],
+			nM: 'audio video texttrackapi'
 		});
 		addPolyfill('mediaelement-swf', {
 			f: 'mediaelement',
-			options: {
-				hasToPlay: 'any',
-				preferFlash: false,
-				jwVars: {},
-				jwParams: {},
-				jwAttrs: {},
-				changeJW: $.noop
-			},
-			methodNames: ['play', 'pause', 'canPlayType', 'mediaLoad:load'],
-			d: ['swfobject', DOMSUPPORT],
+			d: deps,
 			test: function(){
-				if(!Modernizr.audio || !Modernizr.video){
-					return false;
-				}
-				var options = this.options;
-				var hasToPlay = options.hasToPlay;
-				return !( (!window.swfobject || window.swfobject.hasFlashPlayerVersion('9.0.115')) && (options.preferFlash || (hasToPlay != 'any' && !Modernizr.video[hasToPlay] && !Modernizr.audio[hasToPlay])));
-			},
-			c: [10, 9, 22, 20]
+				return this.options.player != 'jwplayer' ? true : swfTest.apply(this, arguments);
+			}
 		});
 		
-	}
+		addPolyfill('mediaelement-jaris', {
+			f: 'mediaelement',
+			d: deps,
+			test: function(){
+				return this.options.player == 'jwplayer' ? true : swfTest.apply(this, arguments);
+			},
+			c: [21, 19, 20]
+		});
+		
+		bugs.track = (Modernizr.track && (!Modernizr.texttrackapi || typeof (document.createElement('track').track || {}).mode != 'string'));
+		
+		addPolyfill('track', {
+			options: {
+				positionDisplay: true,
+				override: bugs.track
+			},
+			test: function(){
+				return Modernizr.track && !this.options.override && !bugs.track;
+			},
+			d: ['mediaelement', DOMSUPPORT],
+			methodNames: ['addTextTrack'],
+			c: [21, 12, 13, 22],
+			nM: 'texttrackapi'
+		});
+		
+		addModule('track-ui', {
+			d: ['track']
+		});
+	})();
 	//>
 	
 	
@@ -1127,6 +1233,7 @@
 		loaded: true,
 		c: removeCombos
 	});
+	
 	
 	jScripts
 		.filter('[data-polyfill-cfg]')

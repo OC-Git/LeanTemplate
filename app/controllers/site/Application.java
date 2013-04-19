@@ -4,17 +4,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import models.Ding;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.queryParser.ParseException;
 
-import models.Ding;
 import play.Logger;
 import play.data.Form;
-import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Security;
 import search.DefaultSearchController;
-import search.DefaultSearchController.SearchForm;
 import search.entities.DingListener;
 import authenticate.site.SiteSecured;
 import de.objectcode.play2.plugin.monitoring.Aggregator;

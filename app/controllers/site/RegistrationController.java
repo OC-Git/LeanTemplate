@@ -14,7 +14,6 @@ import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import utils.MailHelper;
-
 import authenticate.Authenticated;
 
 import com.avaje.ebean.Ebean;

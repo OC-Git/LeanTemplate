@@ -7,7 +7,7 @@ EclipsifyCurrentProject()
 {
 	cp project/Build.scala project/Build.scala.bak
 	sed -i 's/JAVA/SCALA/g' project/Build.scala
-	play "eclipsify with-source=true"
+	play "eclipse with-source=true"
 	rm project/Build.scala
 	mv project/Build.scala.bak project/Build.scala
 	mkdir target/scala-2.9.1/classes_managed

@@ -1,6 +1,7 @@
 package search;
 
 import java.util.List;
+
 import models.Ding;
 import play.Logger;
 import search.entities.DingListener;

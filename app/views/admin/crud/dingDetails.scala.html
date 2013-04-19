@@ -5,13 +5,14 @@
 @import controllers.admin.routes 
 @import views.html.helper._
 @import views.html.oc_helper._ 
-@import views.html.oc_helper.bootstrap2._ 
 @import models._
+ 
+@implicitFieldConstructor = @{ FieldConstructor(bootstrap2FieldConstructor.f) } 
 
 @views.html.admin.loggedin_main() {
 
   @crudForm() {
-
+ 
     @inputText( f("name"), '_label -> "Name", disabledOrNot() ) 
     @textarea( f("description"), '_label -> "Beschreibung", disabledOrNot() ) 
     @checkboxField( f("special"), '_label -> "Spezial", disabledOrNot() )  

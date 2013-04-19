@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import play.Application;
 import play.Configuration;
 import play.Logger;
+import play.Play;
 import play.Plugin;
 import play.libs.Akka;
 import scala.concurrent.duration.Duration;
@@ -36,7 +37,7 @@ public class MonitoringPlugin extends Plugin {
 
 	private <T> T newInstance(final String name, final Class<T> interfaceClass) {
 		try {
-			final Object o = Class.forName(name).newInstance();
+			final Object o = Play.application().classloader().loadClass(name).newInstance();
 			return interfaceClass.cast(o);
 		} catch (final Exception e) {
 			Logger.error("Could not instantiate infoAdapter class=" + name + " due to " + e, e);
